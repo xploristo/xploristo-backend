@@ -1,3 +1,4 @@
+import serverless from 'serverless-http';
 import express from 'express';
 import mongoose from 'mongoose';
 import cors from 'cors';
@@ -5,6 +6,7 @@ import cors from 'cors';
 import customErrorHandler from './middlewares/custom-error-handler.js';
 import authMiddleware from './middlewares/auth.js';
 import routes from './routes/routes.js';
+import s3Service from './services/s3.service.js';
 
 const app = express();
 
@@ -19,6 +21,24 @@ async function start() {
   app.use(routes);
   app.use(customErrorHandler);
 
-app.listen(port, () => {
-  console.log(`App listening at http://localhost:${port}`);
-});
+  bootstrapServices();
+}
+
+function bootstrapServices() {
+  s3Service.bootstrap({
+    signatureVersion: process.env.S3_SIGNATURE_VERSION,
+    region: process.env.S3_REGION,
+    accessKeyId: process.env.S3_ACCESS_KEY_ID,
+    secretAccessKey: process.env.S3_SECRET_ACCESS_KEY,
+  });
+}
+
+const handler = serverless(app);
+const asyncHandler = async (event) => {
+  await start();
+  return handler(event);
+};
+
+export {
+  asyncHandler
+};

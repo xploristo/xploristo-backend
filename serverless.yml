@@ -1,0 +1,22 @@
+service: xploristo
+
+plugins:
+  - serverless-offline
+  - serverless-dotenv-plugin
+
+custom:
+  serverless-offline:
+    httpPort: 8081
+      
+provider:
+  name: aws
+  runtime: nodejs16.x
+  region: eu-west-1
+  # environment:
+    # https://www.serverless.com/plugins/serverless-dotenv-plugin
+   
+functions:
+  app:
+    handler: src/app.asyncHandler
+    events:
+      - httpApi: '*'
