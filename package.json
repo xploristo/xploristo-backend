@@ -5,7 +5,11 @@
   "main": "src/app.js",
   "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start:dev": "serverless offline",
+    "nodemon": "nodemon --exec serverless offline",
+    "lint": "npx eslint . --ext js,json",
+    "lint:fix": "npx eslint . --ext js,json --fix"
   },
   "repository": {
     "type": "git",
@@ -18,6 +22,18 @@
   },
   "homepage": "https://github.com/xploristo/xploristo-backend#readme",
   "dependencies": {
-    "express": "^4.17.2"
+    "aws-sdk": "^2.1148.0",
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "express": "^4.17.2",
+    "generate-password": "^1.7.0",
+    "mongoose": "^6.2.4",
+    "serverless-http": "^3.0.2"
+  },
+  "devDependencies": {
+    "eslint": "^8.11.0",
+    "nodemon": "^2.0.19",
+    "serverless-dotenv-plugin": "^4.0.2",
+    "serverless-offline": "^9.3.1"
   }
 }
