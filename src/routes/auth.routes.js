@@ -1,7 +1,9 @@
 import express from 'express';
 
-import AuthController from '../controllers/auth.controller.js';
+import authController from '../controllers/auth.controller.js';
+import asyncErrorHandler from '../middlewares/async-error-handler.js';
 
 export default express
   .Router()
-  .post('/', AuthController.login);
+  .post('/', asyncErrorHandler(authController.login))
+  .put('/password', asyncErrorHandler(authController.setPassword));
