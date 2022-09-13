@@ -7,6 +7,7 @@ import customErrorHandler from './middlewares/custom-error-handler.js';
 import authMiddleware from './middlewares/auth.js';
 import routes from './routes/routes.js';
 import s3Service from './services/s3.service.js';
+import redisService from './services/redis.service.js';
 
 const app = express();
 
@@ -30,6 +31,13 @@ function bootstrapServices() {
     region: process.env.S3_REGION,
     accessKeyId: process.env.S3_ACCESS_KEY_ID,
     secretAccessKey: process.env.S3_SECRET_ACCESS_KEY,
+  });
+
+  redisService.bootstrap({
+    host: process.env.REDIS_HOST,
+    port: process.env.REDIS_PORT,
+    username: process.env.REDIS_USERNAME,
+    password: process.env.REDIS_PASSWORD,
   });
 }
 

@@ -19,6 +19,25 @@ async function createUser(data) {
   return User.create({ ...data, credentialsId });
 }
 
+/**
+ * Returns user linked to given credentials.
+ * 
+ * @param {string} credentialsId Credentials id.
+ * 
+ * @returns Found user.
+ * @throws  A USER_NOT_FOUND error when no user is found.
+ */
+async function getUserByCredentials(credentialsId) {
+  const user = await User.findOne({ credentialsId });
+
+  if (!user) {
+    throw new ApiError(404, 'USER_NOT_FOUND', 'User not found for given credentials.');
+  }
+  
+  return user;
+}
+
 export default {
-  createUser
+  createUser,
+  getUserByCredentials
 };
