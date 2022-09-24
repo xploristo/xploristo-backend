@@ -13,7 +13,7 @@ const uuidNamespace = process.env.UUID_NAMESPACE;
 
 const sessionTTL = process.env.SESSION_TTL;
 const jwtOptions = {
-  expiresIn: sessionTTL,
+  expiresIn: sessionTTL + 's',
   audience: 'xploristo',
   issuer: 'xploristo-backend',
 };
@@ -97,11 +97,36 @@ async function login(email, password) {
 
   // TODO sessionRefreshToken
 
-  return { sessionToken };
+  return { sessionToken, sessionTTL };
+}
+
+/**
+ * Verifies provided JWT, returning session data.
+ * 
+ * @param {string} jwToken The JWT.
+ *
+ * @throws An error if no session data was found. 
+ */
+async function verifyToken(jwToken) {
+  let jti;
+  try {
+    ({ jti } = jwt.verify(jwToken, jwtSecret, jwtOptions));
+  } catch (error) {
+    throw new ApiError(401, 'UNAUTHORIZED', error.message);
+  }
+  
+  let jwtUser = await redisService.getKey(`xploristo-session:${jti}`);
+
+  if (!jwtUser) {
+    throw new ApiError(401, 'UNAUTHORIZED', 'No session found.');
+  }
+
+  return JSON.parse(jwtUser);
 }
 
 export default {
   createCredentials,
   setPassword,
   login,
+  verifyToken,
 };

@@ -2,9 +2,10 @@ import serverless from 'serverless-http';
 import express from 'express';
 import mongoose from 'mongoose';
 import cors from 'cors';
+import cookieParser from 'cookie-parser';
 
 import customErrorHandler from './middlewares/custom-error-handler.js';
-import authMiddleware from './middlewares/auth.js';
+import authHandler from './middlewares/auth-handler.js';
 import routes from './routes/routes.js';
 import s3Service from './services/s3.service.js';
 import redisService from './services/redis.service.js';
@@ -16,9 +17,14 @@ async function start() {
 
   app.use(express.json()); // For parsing application/json
 
-  app.use(cors());
+  app.use(cors({
+    origin: process.env.FRONTEND_URL,
+    credentials: true,
+  }));
 
-  app.use(authMiddleware);
+  app.use(cookieParser());
+
+  app.use(authHandler);
   app.use(routes);
   app.use(customErrorHandler);
 

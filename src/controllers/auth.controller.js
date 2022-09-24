@@ -1,11 +1,13 @@
 import authService from '../services/auth.service.js';
 
+
 async function login(req, res) {
   const { email, password } = req.body;
 
-  const result = await authService.login(email, password);
+  const { sessionToken, sessionTTL } = await authService.login(email, password);
 
-  res.status(200).json(result);
+  // TODO Should I use HttpOnly and find other way of knowing whether the user still has a session in frontend?
+  res.setHeader('Set-Cookie', `xpl_sid=${sessionToken}; max-age=${sessionTTL}; Path=/; SameSite=Strict; Secure`).sendStatus(200);
 }
 
 async function setPassword(req, res) {

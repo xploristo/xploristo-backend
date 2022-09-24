@@ -47,7 +47,17 @@ async function createKey(key, value, TTL) {
   return redis.set(key, value, 'EX', TTL);
 }
 
+/**
+ * Returns value of given key.
+ * 
+ * @param {string} key Key's name.
+ */
+async function getKey(key) {
+  return redis.get(key);
+}
+
 export default {
   bootstrap,
   createKey,
+  getKey,
 };
