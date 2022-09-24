@@ -5,4 +5,5 @@ import asyncErrorHandler from '../middlewares/async-error-handler.js';
 
 export default express
   .Router()
-  .post('/', asyncErrorHandler(usersController.createUser));
+  .post('/', asyncErrorHandler(usersController.createUser))
+  .get('/profile', asyncErrorHandler(usersController.getUserProfile));

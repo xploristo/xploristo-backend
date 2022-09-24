@@ -37,7 +37,28 @@ async function getUserByCredentials(credentialsId) {
   return user;
 }
 
+/**
+ * Returns given user's profile.
+ * 
+ * @param {string} userId The user's id.
+ */
+async function getUserProfile(userId) {
+  const user = await User.findById(userId);
+  if (!user) {
+    throw new ApiError(404, 'USER_NOT_FOUND', 'User not found.');
+  }
+
+  return {
+    userId,
+    role: user.role,
+    email: user.email,
+    firstName: user.firstName,
+    lastName: user.lastName
+  };
+}
+
 export default {
   createUser,
-  getUserByCredentials
+  getUserByCredentials,
+  getUserProfile,
 };
