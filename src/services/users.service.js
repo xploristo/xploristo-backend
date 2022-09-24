@@ -2,6 +2,14 @@ import ApiError from '../helpers/api-error.js';
 import { User } from '../models/user.js';
 import authService from './auth.service.js';
 
+import studentPermissions from '../config/front-permissions/student.json';
+import teacherPermissions from '../config/front-permissions/teacher.json';
+
+const permissions = {
+  student: studentPermissions,
+  teacher: teacherPermissions
+};
+
 async function createUser(data) {
   // TODO Validate email
   const { email, role } = data;
@@ -53,7 +61,8 @@ async function getUserProfile(userId) {
     role: user.role,
     email: user.email,
     firstName: user.firstName,
-    lastName: user.lastName
+    lastName: user.lastName,
+    permissions: permissions[user.role],
   };
 }
 
