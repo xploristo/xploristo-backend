@@ -1,5 +1,6 @@
 {
   "test": {
+    "create": true,
     "edit": true,
     "list": true
   }

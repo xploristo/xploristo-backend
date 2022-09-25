@@ -5,4 +5,5 @@ import asyncErrorHandler from '../middlewares/async-error-handler.js';
 
 export default express
   .Router()
-  .post('/', asyncErrorHandler(testsController.createTest));
+  .post('/', asyncErrorHandler(testsController.createTest))
+  .get('/:testId', asyncErrorHandler(testsController.getTest));

@@ -10,20 +10,20 @@ function bootstrap(awsConfig) {
   s3 = new aws.S3(awsConfig);
 }
 
-function getUploadUrl(fileName, fileType = 'application/pdf') {
+function getUploadUrl(filePath, fileType = 'application/pdf') {
   return s3.getSignedUrl('putObject', {
     Bucket: documentsBucketName,
-    Key: fileName,
+    Key: filePath,
     ContentType: fileType,
     /* ContentDisposition: 'inline', */
     Expires: 60,
   });
 }
 
-function getDownloadUrl(fileName) {
+function getDownloadUrl(filePath) {
   return s3.getSignedUrl('getObject', {
     Bucket: documentsBucketName,
-    Key: fileName,
+    Key: filePath,
     Expires: 60,
   });
 }

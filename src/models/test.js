@@ -1,9 +1,12 @@
 import mongoose from 'mongoose';
 
 const testSchema = new mongoose.Schema({
-  documentId: { type: mongoose.Types.ObjectId, required: true },
   name: { type: String, required: true },
-  questions: { type: Object, required: true }
+  document: {
+    name: { type: String, default: 'application/pdf' },
+    path: { type: String, required: true }
+  },
+  questions: { type: Object }
 }, {
   timestamps: true
 });
