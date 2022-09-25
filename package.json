@@ -35,6 +35,8 @@
     "uuid": "^9.0.0"
   },
   "devDependencies": {
+    "@babel/eslint-parser": "^7.19.1",
+    "@babel/plugin-syntax-import-assertions": "^7.18.6",
     "eslint": "^8.11.0",
     "nodemon": "^2.0.19",
     "serverless-dotenv-plugin": "^4.0.2",

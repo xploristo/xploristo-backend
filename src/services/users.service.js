@@ -2,8 +2,8 @@ import ApiError from '../helpers/api-error.js';
 import { User } from '../models/user.js';
 import authService from './auth.service.js';
 
-import studentPermissions from '../config/front-permissions/student.json';
-import teacherPermissions from '../config/front-permissions/teacher.json';
+import studentPermissions from '../config/front-permissions/student.json' assert { type: 'json' };
+import teacherPermissions from '../config/front-permissions/teacher.json' assert { type: 'json' };
 
 const permissions = {
   student: studentPermissions,
