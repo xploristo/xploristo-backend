@@ -65,9 +65,19 @@ async function getKey(key) {
   return redis.get(key);
 }
 
+/**
+ * Deletes given key.
+ * 
+ * @param {string} key Key's name.
+ */
+async function deleteKey(key) {
+  return redis.del(key);
+}
+
 export default {
   bootstrap,
   disconnect,
   createKey,
   getKey,
+  deleteKey,
 };

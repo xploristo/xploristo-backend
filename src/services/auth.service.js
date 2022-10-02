@@ -124,9 +124,24 @@ async function verifyToken(jwToken) {
   return JSON.parse(jwtUser);
 }
 
+/**
+ * Clears session data linked to given JWT from Redis.
+ * 
+ * @param {string} jwToken The JWT.
+ */
+async function clearSessionData(jwToken) {
+  try {
+    const { jti } = jwt.verify(jwToken, jwtSecret, jwtOptions);
+    await redisService.deleteKey(`xploristo-session:${jti}`);
+  } catch (_) {
+    // Session no longer exists
+  }
+}
+
 export default {
   createCredentials,
   setPassword,
   login,
   verifyToken,
+  clearSessionData,
 };

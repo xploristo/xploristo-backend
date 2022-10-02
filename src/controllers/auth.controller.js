@@ -15,6 +15,23 @@ async function login(req, res) {
     .sendStatus(200);
 }
 
+async function logout(req, res) {
+  const jwt = req.cookies['xpl_sid'];
+
+  if (jwt) {
+    await authService.clearSessionData(jwt);
+  }
+
+  res
+    .cookie('xpl_sid', '', {
+      expires: new Date(null),
+      sameSite: 'None',
+      secure: true,
+      httpOnly: true,
+    })
+    .sendStatus(200);
+}
+
 async function setPassword(req, res) {
   const { password } = req.body;
 
@@ -25,5 +42,6 @@ async function setPassword(req, res) {
 
 export default {
   login,
+  logout,
   setPassword,
 };
