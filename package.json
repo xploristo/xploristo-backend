@@ -9,7 +9,9 @@
     "start:dev": "serverless offline",
     "nodemon": "nodemon --exec serverless offline",
     "lint": "npx eslint . --ext js,json",
-    "lint:fix": "npx eslint . --ext js,json --fix"
+    "lint:fix": "npx eslint . --ext js,json --fix",
+    "deploy": "serverless deploy",
+    "deploy:production": "serverless deploy --stage production"
   },
   "repository": {
     "type": "git",
