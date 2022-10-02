@@ -6,6 +6,11 @@ async function bootstrap(redisConfig) {
   const { host, port, username, password } = redisConfig;
   let isReady = false;
 
+  if (redis) {
+    // Redis is already connected
+    return;
+  }
+
   redis = new Redis({
     host,
     port,
@@ -14,7 +19,7 @@ async function bootstrap(redisConfig) {
   });
 
   redis.on('ready', () => {
-    console.info('Redis is ready.');
+    console.info('✅ Redis is ready!');
     isReady = true;
   });
 
@@ -30,6 +35,10 @@ async function bootstrap(redisConfig) {
       throw new Error('Redis is not connecting (waited for 30 seconds)');
     }
   }
+}
+
+function disconnect() {
+  redis.disconnect();
 }
 
 function _sleep(ms) {
@@ -58,6 +67,7 @@ async function getKey(key) {
 
 export default {
   bootstrap,
+  disconnect,
   createKey,
   getKey,
 };

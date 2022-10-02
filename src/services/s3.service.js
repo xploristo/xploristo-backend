@@ -7,7 +7,9 @@ let s3;
 const documentsBucketName = process.env.DOCUMENTS_BUCKET_NAME;
 
 function bootstrap(awsConfig) {
-  s3 = new aws.S3(awsConfig);
+  if (!s3) {
+    s3 = new aws.S3(awsConfig);
+  }
 }
 
 function getUploadUrl(filePath, fileType = 'application/pdf') {
