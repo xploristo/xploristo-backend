@@ -1,6 +1,7 @@
 import ApiError from '../helpers/api-error.js';
 import { User } from '../models/user.js';
 import authService from './auth.service.js';
+import mailService from './mail.service.js';
 
 import studentPermissions from '../config/front-permissions/student.json' assert { type: 'json' };
 import teacherPermissions from '../config/front-permissions/teacher.json' assert { type: 'json' };
@@ -21,8 +22,11 @@ async function createUser(data) {
 
   const { _id: credentialsId, password } = await authService.createCredentials(email, role);
 
-  // TODO Send email with generated password
-  console.log('password', password);
+  try {
+    await mailService.sendPasswordEmail(email, password);
+  } catch (error) {
+    throw new ApiError(500, 'EMAIL_NOT_SENT', error.message);
+  }
 
   return User.create({ ...data, credentialsId });
 }

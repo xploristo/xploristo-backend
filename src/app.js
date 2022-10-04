@@ -9,6 +9,7 @@ import routes from './routes/routes.js';
 import s3Service from './services/s3.service.js';
 import redisService from './services/redis.service.js';
 import mongooseService from './services/mongoose.service.js';
+import mailService from './services/mail.service.js';
 
 const app = express();
 
@@ -32,6 +33,11 @@ async function start() {
 }
 
 function bootstrapServices() {
+  mailService.bootstrap({
+    user: process.env.MAIL_USER,
+    pass: process.env.MAIL_PASS,
+  });
+
   s3Service.bootstrap({
     signatureVersion: process.env.S3_SIGNATURE_VERSION,
     region: process.env.S3_REGION,
