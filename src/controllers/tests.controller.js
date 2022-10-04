@@ -24,8 +24,17 @@ async function getTest(req, res) {
   res.status(200).json(test);
 }
 
+async function deleteTest(req, res) {
+  const { testId } = req.params;
+
+  await testsService.deleteTest(testId);
+
+  res.sendStatus(200);
+}
+
 export default {
   createTest,
   updateTest,
   getTest,
+  deleteTest,
 };

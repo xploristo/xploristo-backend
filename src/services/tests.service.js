@@ -60,8 +60,25 @@ async function getTest(testId) {
   return { ...test.toJSON(), documentDownloadUrl };
 }
 
+async function deleteTest(testId) {
+  const test = await Test.findById(testId);
+  if (!test) {
+    throw new ApiError(404, 'TEST_NOT_FOUND', `Test not found with id ${testId}.`);
+  }
+
+  try {
+    const path = test.document.path;
+    await s3Service.deleteDocument(documentPath(testId, path));
+
+    await Test.remove({ _id: testId });
+  } catch (error) {
+    throw new ApiError(500, 'DELETE_TEST_ERROR', error.message);
+  }
+}
+
 export default {
   createTest,
   updateTest,
   getTest,
+  deleteTest,
 };

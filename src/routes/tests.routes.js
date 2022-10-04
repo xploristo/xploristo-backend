@@ -7,4 +7,5 @@ export default express
   .Router()
   .post('/', asyncErrorHandler(testsController.createTest))
   .put('/:testId', asyncErrorHandler(testsController.updateTest))
-  .get('/:testId', asyncErrorHandler(testsController.getTest));
+  .get('/:testId', asyncErrorHandler(testsController.getTest))
+  .delete('/:testId', asyncErrorHandler(testsController.deleteTest));
