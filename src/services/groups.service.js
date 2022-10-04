@@ -67,10 +67,10 @@ async function createGroup(data, teacherId) {
 }
 
 async function createAssignment(groupId, data) {
-  let { endDate, testIds = [] } = data;
+  let { endDate, testId } = data;
   let assignmentData = {
     groupId,
-    testIds
+    testId
   };
   if (endDate) {
     assignmentData.endDate = endDate;
