@@ -1,14 +1,39 @@
 import { Group } from '../models/group.js';
 import { Assignment } from '../models/assignment.js';
 
+async function getGroup(groupId) {
+  const group = await Group.aggregate([
+    {
+      $match: {
+        _id: groupId
+      }
+    },
+    {
+      $lookup: {
+        from: 'assignments',
+        localField: '_id',
+        foreignField: 'groupId',
+        as: 'assigments',
+      },
+    },
+    {
+      $unwind: {
+        path: '$assigments',
+        preserveNullAndEmptyArrays: true,
+      },
+    },
+  ]);
+  return group;
+}
+
 async function getGroups(userId) {
   const groups = await Group.aggregate([
     {
       $match: {
         $or: [
           {
-            teacherIds: userId,
-            studentIds: userId,
+            teacherIds: { $in: userId },
+            studentIds: { $in: userId },
           }
         ]
       }
@@ -38,7 +63,7 @@ async function createGroup(data, teacherId) {
 
   const group = await Group.create({ name, teacherIds });
 
-  return group;
+  return group.toJSON();
 }
 
 async function createAssignment(groupId, data) {
@@ -53,10 +78,11 @@ async function createAssignment(groupId, data) {
 
   const assignment = await Assignment.create(assignmentData);
 
-  return assignment;
+  return assignment.toJSON();
 }
 
 export default {
+  getGroup,
   getGroups,
   createGroup,
   createAssignment,

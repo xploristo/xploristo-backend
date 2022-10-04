@@ -1,5 +1,13 @@
 import groupsService from '../services/groups.service.js';
 
+async function getGroup(req, res) {
+  const { groupId } = req.params;
+  
+  const group = await groupsService.getGroup(groupId);
+
+  res.status(201).json(group);
+}
+
 async function getGroups(req, res) {
   const { userId } = req.jwtUser;
   
@@ -31,6 +39,7 @@ async function createAssignment(req, res) {
 }
 
 export default {
+  getGroup,
   getGroups,
   createGroup,
   createAssignment,
