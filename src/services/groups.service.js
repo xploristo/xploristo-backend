@@ -1,6 +1,36 @@
 import { Group } from '../models/group.js';
 import { Assignment } from '../models/assignment.js';
 
+async function getGroups(userId) {
+  const groups = await Group.aggregate([
+    {
+      $match: {
+        $or: [
+          {
+            teacherIds: userId,
+            studentIds: userId,
+          }
+        ]
+      }
+    },
+    {
+      $lookup: {
+        from: 'assignments',
+        localField: '_id',
+        foreignField: 'groupId',
+        as: 'assigments',
+      },
+    },
+    {
+      $unwind: {
+        path: '$assigments',
+        preserveNullAndEmptyArrays: true,
+      },
+    },
+  ]);
+  return groups;
+}
+
 async function createGroup(data, teacherId) {
   let { name, teacherIds = [] } = data;
   teacherIds.push(teacherId);
@@ -27,6 +57,7 @@ async function createAssignment(groupId, data) {
 }
 
 export default {
+  getGroups,
   createGroup,
   createAssignment,
 };

@@ -4,6 +4,7 @@ const ObjectId = mongoose.Schema.Types.ObjectId;
 const groupSchema = new mongoose.Schema({
   name: { type: String, required: true },
   teacherIds: { type: [ObjectId] },
+  studentIds: { type: [ObjectId] }
 }, {
   timestamps: true
 });

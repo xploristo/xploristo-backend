@@ -5,5 +5,6 @@ import asyncErrorHandler from '../middlewares/async-error-handler.js';
 
 export default express
   .Router()
+  .get('/', asyncErrorHandler(groupsController.getGroups))
   .post('/', asyncErrorHandler(groupsController.createGroup))
   .post('/:groupId/assignment', asyncErrorHandler(groupsController.createAssignment));
