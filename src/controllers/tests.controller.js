@@ -7,6 +7,15 @@ async function createTest(req, res) {
   res.status(201).json(test);
 }
 
+async function updateTest(req, res) {
+  // TODO Validate body (Joi?)
+  const { testId } = req.params;
+
+  const test = await testsService.updateTest(testId, req.body);
+
+  res.status(201).json(test);
+}
+
 async function getTest(req, res) {
   const { testId } = req.params;
 
@@ -17,5 +26,6 @@ async function getTest(req, res) {
 
 export default {
   createTest,
+  updateTest,
   getTest,
 };

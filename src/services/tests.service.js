@@ -25,6 +25,29 @@ async function createTest(data) {
   return { ...test.toJSON(), documentUploadUrl };
 }
 
+async function updateTest(testId, data) {
+  const { name, /* document, */ questions } = data;
+  /* const { path, type: documentType } = document; */
+
+  const test = await Test.findOneAndUpdate(testId, { name, questions });
+  return test;
+
+  // TODO updateTestDocument function and endpoint
+  /* try {
+    const documentUploadUrl = await s3Service.getUploadUrl(documentPath(testId, path), documentType);
+
+    const oldTest = await Test.findById(testId);
+    const oldPath = oldTest.document.path;
+    await s3Service.deleteDocument(documentPath(testId, oldPath));
+    
+    const test = await Test.findOneAndUpdate(testId, { name, questions });
+
+    return { ...test.toJSON(), documentUploadUrl };
+  } catch (error) {
+    throw new ApiError(500, 'UPDATE_TEST_ERROR', error.message);
+  } */
+}
+
 async function getTest(testId) {
   const test = await Test.findById(testId);
   if (!test) {
@@ -35,10 +58,10 @@ async function getTest(testId) {
   const documentDownloadUrl = await s3Service.getDownloadUrl(documentPath(testId, path));
 
   return { ...test.toJSON(), documentDownloadUrl };
-
 }
 
 export default {
   createTest,
+  updateTest,
   getTest,
 };

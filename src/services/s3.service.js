@@ -30,9 +30,17 @@ function getDownloadUrl(filePath) {
   });
 }
 
+async function deteleDocument(filePath) {
+  return s3.deleteObject({
+    Bucket: documentsBucketName,
+    Key: filePath,
+  }).promise();
+}
+
 
 export default {
   bootstrap,
   getUploadUrl,
-  getDownloadUrl
+  getDownloadUrl,
+  deteleDocument
 };
