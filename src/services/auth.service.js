@@ -43,7 +43,10 @@ async function createCredentials(email, role) {
 
 async function setPassword(userId, password) {
   const hashedPassword = await _hashPassword(password);
-  console.log('hashedPassword', hashedPassword);
+  const user = await usersService.getUserProfile(userId);
+  const { email } = user;
+
+  await Credentials.findOneAndUpdate({ email }, { password: hashedPassword, mustResetPassword: false });
 }
 
 async function _hashPassword(password) {
@@ -97,7 +100,7 @@ async function login(email, password) {
 
   // TODO sessionRefreshToken
 
-  return { sessionToken, sessionTTL };
+  return { sessionToken, sessionTTL, result: { mustResetPassword: credentials.mustResetPassword } };
 }
 
 /**

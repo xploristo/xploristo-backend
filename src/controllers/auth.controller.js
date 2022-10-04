@@ -3,7 +3,7 @@ import authService from '../services/auth.service.js';
 async function login(req, res) {
   const { email, password } = req.body;
 
-  const { sessionToken, sessionTTL } = await authService.login(email, password);
+  const { sessionToken, sessionTTL, result } = await authService.login(email, password);
 
   res
     .cookie('xpl_sid', sessionToken, {
@@ -12,7 +12,8 @@ async function login(req, res) {
       secure: true,
       httpOnly: true,
     })
-    .sendStatus(200);
+    .status(200)
+    .json(result);
 }
 
 async function logout(req, res) {
@@ -34,8 +35,9 @@ async function logout(req, res) {
 
 async function setPassword(req, res) {
   const { password } = req.body;
+  const { userId } = req.jwtUser;
 
-  await authService.setPassword(null, password);
+  await authService.setPassword(userId, password);
   
   res.sendStatus(200);
 }
