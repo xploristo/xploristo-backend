@@ -9,6 +9,16 @@ async function createGroup(req, res) {
   res.status(201).json(group);
 }
 
+async function createAssignment(req, res) {
+  // TODO Validate body (Joi?)
+  const { groupId } = req.params;
+
+  const assignment = await groupsService.createAssignment(groupId, req.body);
+
+  res.status(201).json(assignment);
+}
+
 export default {
-  createGroup
+  createGroup,
+  createAssignment,
 };
