@@ -38,9 +38,22 @@ async function createAssignment(req, res) {
   res.status(201).json(assignment);
 }
 
+async function getAssignments(req, res) {
+  const { groupId } = req.params;
+  
+  const assignments = await groupsService.getAssignments(groupId);
+
+  if (!assignments || !assignments.length) {
+    return res.status(204).json(assignments);
+  }
+
+  res.status(201).json(assignments);
+}
+
 export default {
   getGroup,
   getGroups,
   createGroup,
   createAssignment,
+  getAssignments
 };

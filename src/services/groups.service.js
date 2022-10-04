@@ -81,9 +81,15 @@ async function createAssignment(groupId, data) {
   return assignment.toJSON();
 }
 
+async function getAssignments(groupId) {
+  const assignments = await Assignment.find({ groupId });
+  return assignments;
+}
+
 export default {
   getGroup,
   getGroups,
   createGroup,
   createAssignment,
+  getAssignments,
 };

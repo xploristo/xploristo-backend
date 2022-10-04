@@ -8,4 +8,5 @@ export default express
   .get('/', asyncErrorHandler(groupsController.getGroups))
   .post('/', asyncErrorHandler(groupsController.createGroup))
   .get('/:groupId', asyncErrorHandler(groupsController.getGroup))
-  .post('/:groupId/assignment', asyncErrorHandler(groupsController.createAssignment));
+  .post('/:groupId/assignment', asyncErrorHandler(groupsController.createAssignment))
+  .get('/:groupId/assignment', asyncErrorHandler(groupsController.getAssignments));
