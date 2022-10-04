@@ -50,10 +50,21 @@ async function getAssignments(req, res) {
   res.status(201).json(assignments);
 }
 
+async function enrollStudents(req, res) {
+  // TODO Validate body (Joi?)
+  const { groupId } = req.params;
+
+  const group = await groupsService.enrollStudents(groupId, req.body);
+
+  res.status(201).json(group);
+
+}
+
 export default {
   getGroup,
   getGroups,
   createGroup,
   createAssignment,
-  getAssignments
+  getAssignments,
+  enrollStudents
 };

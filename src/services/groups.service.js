@@ -1,5 +1,6 @@
 import { Group } from '../models/group.js';
 import { Assignment } from '../models/assignment.js';
+import usersService from './users.service.js';
 
 async function getGroup(groupId) {
   const group = await Group.aggregate([
@@ -63,11 +64,11 @@ async function createGroup(data, teacherId) {
 
   const group = await Group.create({ name, teacherIds });
 
-  return group.toJSON();
+  return group;
 }
 
 async function createAssignment(groupId, data) {
-  let { endDate, testId } = data;
+  const { endDate, testId } = data;
   let assignmentData = {
     groupId,
     testId
@@ -78,12 +79,32 @@ async function createAssignment(groupId, data) {
 
   const assignment = await Assignment.create(assignmentData);
 
-  return assignment.toJSON();
+  return assignment;
 }
 
 async function getAssignments(groupId) {
   const assignments = await Assignment.find({ groupId });
   return assignments;
+}
+
+async function enrollStudents(groupId, data) {
+  // TODO receive csv
+  const { students } = data;
+  let studentIds;
+
+  await Promise.all(students.map(async (student) => {
+    const { email } = student;
+    const user = await usersService.findOneAndUpdate({ email }, { ...student, role: 'student' }, { upsert: true });
+    studentIds.push(user._id);
+  }));
+
+  const group = await Group.findOneAndUpdate(groupId, {
+    $addToSet: {
+      studentIds: { $each: studentIds } 
+    },
+  });
+
+  return group;
 }
 
 export default {
@@ -92,4 +113,5 @@ export default {
   createGroup,
   createAssignment,
   getAssignments,
+  enrollStudents,
 };
