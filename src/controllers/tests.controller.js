@@ -16,6 +16,15 @@ async function updateTest(req, res) {
   res.status(201).json(test);
 }
 
+async function updateTestDocument(req, res) {
+  // TODO Validate body (Joi?)
+  const { testId } = req.params;
+
+  const test = await testsService.updateTestDocument(testId, req.body);
+
+  res.status(201).json(test);
+}
+
 async function getTest(req, res) {
   const { testId } = req.params;
 
@@ -35,6 +44,7 @@ async function deleteTest(req, res) {
 export default {
   createTest,
   updateTest,
+  updateTestDocument,
   getTest,
   deleteTest,
 };
