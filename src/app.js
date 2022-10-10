@@ -18,10 +18,12 @@ async function start() {
 
   app.use(express.json()); // For parsing application/json
 
-  app.use(cors({
-    origin: process.env.FRONTEND_URL,
-    credentials: true,
-  }));
+  app.use(
+    cors({
+      origin: process.env.FRONTEND_URL,
+      credentials: true,
+    })
+  );
 
   app.use(cookieParser());
 
@@ -55,28 +57,28 @@ function bootstrapServices() {
 
 async function stop() {
   redisService.disconnect();
-  console.log('👋 Redis disconnected.');
+  console.info('👋 Redis disconnected.');
   // await mongoose.disconnect();
 
   await mongooseService.disconnect();
-  console.log('👋 MongoDB disconnected.');
+  console.info('👋 MongoDB disconnected.');
 
-  console.log('👋 Exiting...');
+  console.info('👋 Exiting...');
   process.exit(0);
 }
 
 // TODO Errors when starting app via handler are sent as 200
+// errorMessage, errorType, stackTrace
+
 // TODO Log requests ?
 
-const handler = serverless(app);
+const handler = serverless(app, { callbackWaitsForEmptyEventLoop: false });
 const asyncHandler = async (event) => {
   await start();
   return handler(event);
 };
 
-export {
-  asyncHandler
-};
+export { asyncHandler };
 
 // TODO This does not seem to work
 // AWS Lambda graceful shutdown https://github.com/aws-samples/graceful-shutdown-with-aws-lambda
