@@ -26,21 +26,22 @@ function getDownloadUrl(filePath) {
   return s3.getSignedUrl('getObject', {
     Bucket: documentsBucketName,
     Key: filePath,
-    Expires: 60,
+    Expires: 3600,
   });
 }
 
-async function deteleDocument(filePath) {
-  return s3.deleteObject({
-    Bucket: documentsBucketName,
-    Key: filePath,
-  }).promise();
+async function deleteDocument(filePath) {
+  return s3
+    .deleteObject({
+      Bucket: documentsBucketName,
+      Key: filePath,
+    })
+    .promise();
 }
-
 
 export default {
   bootstrap,
   getUploadUrl,
   getDownloadUrl,
-  deteleDocument
+  deleteDocument,
 };

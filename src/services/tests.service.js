@@ -6,6 +6,11 @@ import ApiError from '../helpers/api-error.js';
 
 const documentPath = (testId, path) => `${testId}/${path}`;
 
+async function getTests() {
+  const tests = await Test.find({});
+  return tests;
+}
+
 async function createTest(data) {
   const { name, document } = data;
   const { path, type: documentType } = document;
@@ -32,17 +37,19 @@ async function updateTest(testId, data) {
   return test;
 }
 
-async function updateTestDocument(testId, data) {
-  const { document } = data;
+async function updateTestDocument(testId, document) {
   const { path, type: documentType } = document;
 
   try {
-    const documentUploadUrl = await s3Service.getUploadUrl(documentPath(testId, path), documentType);
+    const documentUploadUrl = await s3Service.getUploadUrl(
+      documentPath(testId, path),
+      documentType
+    );
 
     const oldTest = await Test.findById(testId);
     const oldPath = oldTest.document.path;
     await s3Service.deleteDocument(documentPath(testId, oldPath));
-    
+
     const test = await Test.findOneAndUpdate(testId, { document });
 
     return { ...test.toJSON(), documentUploadUrl };
@@ -51,10 +58,23 @@ async function updateTestDocument(testId, data) {
   }
 }
 
-async function getTest(testId) {
+async function getTest(testId, jwtUser) {
   const test = await Test.findById(testId);
   if (!test) {
     throw new ApiError(404, 'TEST_NOT_FOUND', `Test not found with id ${testId}.`);
+  }
+  if (jwtUser.role === 'student') {
+    test.questions = test.questions.map((question) => {
+      question.answers = question.answers.map((answer) => {
+        if (['text', 'selection'].includes(question.type)) {
+          answer.answer = null;
+        } else {
+          answer.correct = false;
+        }
+        return answer;
+      });
+      return question;
+    });
   }
   const path = test.document.path;
 
@@ -80,6 +100,7 @@ async function deleteTest(testId) {
 }
 
 export default {
+  getTests,
   createTest,
   updateTest,
   updateTestDocument,

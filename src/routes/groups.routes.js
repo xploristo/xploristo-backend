@@ -7,7 +7,24 @@ export default express
   .Router()
   .get('/', asyncErrorHandler(groupsController.getGroups))
   .post('/', asyncErrorHandler(groupsController.createGroup))
-  .get('/:groupId', asyncErrorHandler(groupsController.getGroup))
-  .post('/:groupId/assignment', asyncErrorHandler(groupsController.createAssignment))
-  .get('/:groupId/assignment', asyncErrorHandler(groupsController.getAssignments))
-  .post('/:groupId/students', asyncErrorHandler(groupsController.enrollStudents));
+  .get('/:groupId([0-9a-fA-F]{24})', asyncErrorHandler(groupsController.getGroup))
+  .put('/:groupId([0-9a-fA-F]{24})', asyncErrorHandler(groupsController.updateGroup))
+  .delete('/:groupId([0-9a-fA-F]{24})', asyncErrorHandler(groupsController.deleteGroup))
+  .post(
+    '/:groupId([0-9a-fA-F]{24})/assignments',
+    asyncErrorHandler(groupsController.createAssignment)
+  )
+  .put(
+    '/:groupId([0-9a-fA-F]{24})/assignments/:assignmentId([0-9a-fA-F]{24})',
+    asyncErrorHandler(groupsController.updateAssignment)
+  )
+  .delete(
+    '/:groupId([0-9a-fA-F]{24})/assignments/:assignmentId([0-9a-fA-F]{24})',
+    asyncErrorHandler(groupsController.deleteAssignment)
+  )
+  .get('/:groupId([0-9a-fA-F]{24})/assignments', asyncErrorHandler(groupsController.getAssignments))
+  .get(
+    '/:groupId([0-9a-fA-F]{24})/assignments/:assignmentId([0-9a-fA-F]{24})',
+    asyncErrorHandler(groupsController.getAssignment)
+  )
+  .post('/:groupId([0-9a-fA-F]{24})/students', asyncErrorHandler(groupsController.enrollStudents));

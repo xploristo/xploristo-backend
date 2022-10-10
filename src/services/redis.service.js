@@ -16,6 +16,7 @@ async function bootstrap(redisConfig) {
     port,
     username,
     password,
+    connectTimeout: 30000, // 30 seconds
   });
 
   redis.on('ready', () => {
@@ -47,7 +48,7 @@ function _sleep(ms) {
 
 /**
  * Creates a key with given value and time to live (optional).
- * 
+ *
  * @param {string} key   Name for the new key.
  * @param {string} value Value to save to given key.
  * @param {number} [TTL] Seconds to expire key in.
@@ -58,7 +59,7 @@ async function createKey(key, value, TTL) {
 
 /**
  * Returns value of given key.
- * 
+ *
  * @param {string} key Key's name.
  */
 async function getKey(key) {
@@ -67,7 +68,7 @@ async function getKey(key) {
 
 /**
  * Deletes given key.
- * 
+ *
  * @param {string} key Key's name.
  */
 async function deleteKey(key) {
