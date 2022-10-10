@@ -2,27 +2,27 @@
   "name": "xploristo-backend",
   "version": "0.0.0",
   "description": "exploristo's backend",
-  "main": "src/app.js",
-  "type": "module",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start:dev": "serverless offline",
-    "nodemon": "nodemon --exec serverless offline",
-    "lint": "npx eslint . --ext js,json",
-    "lint:fix": "npx eslint . --ext js,json --fix",
-    "deploy": "serverless deploy",
-    "deploy:production": "serverless deploy --stage production"
+  "homepage": "https://github.com/xploristo/xploristo-backend#readme",
+  "bugs": {
+    "url": "https://github.com/xploristo/xploristo-backend/issues"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/xploristo/xploristo-backend.git"
   },
-  "author": "Celia Velasco Martínez",
   "license": "GPL-3.0",
-  "bugs": {
-    "url": "https://github.com/xploristo/xploristo-backend/issues"
+  "author": "Celia Velasco Martínez",
+  "type": "module",
+  "main": "src/app.js",
+  "scripts": {
+    "deploy": "serverless deploy",
+    "deploy:production": "serverless deploy --stage production",
+    "lint": "npx eslint . --ext js,json",
+    "lint:fix": "npx eslint . --ext js,json --fix",
+    "nodemon": "nodemon --exec serverless offline",
+    "start:dev": "serverless offline",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "homepage": "https://github.com/xploristo/xploristo-backend#readme",
   "dependencies": {
     "aws-sdk": "^2.1148.0",
     "bcryptjs": "^2.4.3",
@@ -41,7 +41,12 @@
     "@babel/eslint-parser": "^7.19.1",
     "@babel/plugin-syntax-import-assertions": "^7.18.6",
     "eslint": "^8.11.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-import": "^2.26.0",
+    "eslint-plugin-json-format": "^2.0.1",
+    "eslint-plugin-prettier": "^4.2.1",
     "nodemon": "^2.0.19",
+    "prettier": "^2.7.1",
     "serverless-dotenv-plugin": "^4.0.2",
     "serverless-offline": "^9.3.1"
   }
