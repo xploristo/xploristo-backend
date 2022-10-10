@@ -1,5 +1,8 @@
 {
-  "test": {
+  "groups": {
     "list": true
+  },
+  "tests": {
+    "complete": true
   }
 }

@@ -1,6 +1,29 @@
 {
-  "test": {
+  "assignments": {
     "create": true,
+    "delete": true,
+    "edit": true,
+    "list": true
+  },
+  "groups": {
+    "create": true,
+    "delete": true,
+    "edit": true,
+    "list": true
+  },
+  "nav": {
+    "menu": {
+      "show": true
+    }
+  },
+  "students": {
+    "create": true,
+    "edit": true,
+    "list": true
+  },
+  "tests": {
+    "create": true,
+    "delete": true,
     "edit": true,
     "list": true
   }
