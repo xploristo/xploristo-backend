@@ -38,7 +38,7 @@ async function setPassword(req, res) {
   const { userId } = req.jwtUser;
 
   await authService.setPassword(userId, password);
-  
+
   res.sendStatus(200);
 }
 

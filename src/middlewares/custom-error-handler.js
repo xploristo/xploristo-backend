@@ -11,11 +11,6 @@ export default function (err, req, res, next) {
     status = 500;
   }
 
-  const object = { a: true };
-  if (object.a) {
-    console.log('hello'); 
-  }
-
   console.error(`🔴 ERROR with status ${status}: ${errorCode} ${message}`);
   if (status === 500) {
     console.error(err.stack);

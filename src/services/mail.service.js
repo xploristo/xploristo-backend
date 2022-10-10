@@ -9,8 +9,8 @@ function bootstrap({ user, pass }) {
     service: 'gmail',
     auth: {
       user,
-      pass
-    }
+      pass,
+    },
   });
 }
 
@@ -19,10 +19,10 @@ async function sendPasswordEmail(to, password) {
     from: transporterEmail,
     to,
     subject: 'Xploristo Password',
-    text: `${password}`
+    text: `${password}`,
   };
 
-  return new Promise((resolve,reject) => {
+  return new Promise((resolve, reject) => {
     transporter.sendMail(mailOptions, (error, info) => {
       if (error) {
         console.log(error);
@@ -37,5 +37,5 @@ async function sendPasswordEmail(to, password) {
 
 export default {
   bootstrap,
-  sendPasswordEmail
+  sendPasswordEmail,
 };

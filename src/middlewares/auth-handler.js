@@ -1,7 +1,7 @@
 import ApiError from '../helpers/api-error.js';
 import authService from '../services/auth.service.js';
 
-export default function(req, res, next) {
+export default function (req, res, next) {
   if (req.path === '/auth') {
     return next();
   }
@@ -11,7 +11,8 @@ export default function(req, res, next) {
     throw new ApiError(401, 'UNAUTHORIZED', 'No session cookie.');
   }
 
-  authService.verifyToken(jwt)
+  authService
+    .verifyToken(jwt)
     .then((jwtUser) => {
       req.jwtUser = jwtUser;
       return next();

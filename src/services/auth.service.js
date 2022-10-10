@@ -19,13 +19,12 @@ const jwtOptions = {
 };
 const jwtSecret = process.env.JWT_SECRET;
 
-
 /**
  * Creates credentials for user with given email and role.
- * 
+ *
  * @param {string} email The user's email.
  * @param {string} role  The user's role.
- * 
+ *
  * @returns The credentials' _id and the generated password.
  */
 async function createCredentials(email, role) {
@@ -35,7 +34,7 @@ async function createCredentials(email, role) {
   const credentials = await Credentials.create({
     email,
     password,
-    role
+    role,
   });
 
   return { _id: credentials._id, password: generatedPassword };
@@ -46,7 +45,10 @@ async function setPassword(userId, password) {
   const user = await usersService.getUserProfile(userId);
   const { email } = user;
 
-  await Credentials.findOneAndUpdate({ email }, { password: hashedPassword, mustResetPassword: false });
+  await Credentials.findOneAndUpdate(
+    { email },
+    { password: hashedPassword, mustResetPassword: false }
+  );
 }
 
 async function _hashPassword(password) {
@@ -56,7 +58,7 @@ async function _hashPassword(password) {
 /**
  * Generates a random password with 10 characters and at least one number, uppercase
  * letter and lowercase letter.
- * 
+ *
  * @returns Generated password.
  */
 function _generatePassword() {
@@ -66,7 +68,7 @@ function _generatePassword() {
     numbers: true,
     uppercase: true,
     lowercase: true,
-    strict: true
+    strict: true,
   });
 }
 
@@ -75,7 +77,7 @@ async function login(email, password) {
   if (!credentials) {
     throw new ApiError(400, 'USER_NOT_FOUND', 'No user was found with provided email.');
   }
-  
+
   const didPasswordMatch = await bcryptjs.compare(password, credentials.password);
   if (!didPasswordMatch) {
     throw new ApiError(400, 'WRONG_PASSWORD', 'Wrong password');
@@ -95,7 +97,7 @@ async function login(email, password) {
     jti,
   };
   const sessionToken = jwt.sign(sessionTokenData, jwtSecret, jwtOptions);
-  
+
   await redisService.createKey(`xploristo-session:${jti}`, JSON.stringify(sessionData), sessionTTL);
 
   // TODO sessionRefreshToken
@@ -105,10 +107,10 @@ async function login(email, password) {
 
 /**
  * Verifies provided JWT, returning session data.
- * 
+ *
  * @param {string} jwToken The JWT.
  *
- * @throws An error if no session data was found. 
+ * @throws An error if no session data was found.
  */
 async function verifyToken(jwToken) {
   let jti;
@@ -117,7 +119,7 @@ async function verifyToken(jwToken) {
   } catch (error) {
     throw new ApiError(401, 'UNAUTHORIZED', error.message);
   }
-  
+
   let jwtUser = await redisService.getKey(`xploristo-session:${jti}`);
 
   if (!jwtUser) {
@@ -129,7 +131,7 @@ async function verifyToken(jwToken) {
 
 /**
  * Clears session data linked to given JWT from Redis.
- * 
+ *
  * @param {string} jwToken The JWT.
  */
 async function clearSessionData(jwToken) {
