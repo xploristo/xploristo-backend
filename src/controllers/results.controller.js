@@ -1,7 +1,7 @@
 import resultsService from '../services/results.service.js';
 
 async function getResults(req, res) {
-  const results = await resultsService.getResults();
+  const results = await resultsService.getResults(req.jwtUser);
 
   if (!results || !results.length) {
     return res.status(204).json(results);

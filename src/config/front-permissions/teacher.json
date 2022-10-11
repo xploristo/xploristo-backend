@@ -16,6 +16,9 @@
       "show": true
     }
   },
+  "results": {
+    "list": true
+  },
   "students": {
     "create": true,
     "edit": true,

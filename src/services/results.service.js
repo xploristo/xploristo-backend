@@ -9,16 +9,84 @@ async function getResults(jwtUser) {
   if (jwtUser.role === 'student') {
     query.userId = ObjectId(jwtUser.userId);
   }
-  const results = await Result.find(query);
+  const results = await Result.aggregate([
+    {
+      $match: query,
+    },
+    {
+      $lookup: {
+        from: 'assignments',
+        let: { assignmentId: '$assignmentId' },
+        pipeline: [
+          {
+            $match: {
+              $expr: { $eq: ['$_id', '$$assignmentId'] },
+            },
+          },
+          {
+            $lookup: {
+              from: 'tests',
+              let: { testId: '$testId' },
+              pipeline: [
+                {
+                  $match: {
+                    $expr: { $eq: ['$_id', '$$testId'] },
+                  },
+                },
+                {
+                  $project: {
+                    _id: 1,
+                    name: 1,
+                    document: 1,
+                  },
+                },
+              ],
+              as: 'test',
+            },
+          },
+          {
+            $unwind: {
+              path: '$test',
+              preserveNullAndEmptyArrays: true,
+            },
+          },
+        ],
+        as: 'assignment',
+      },
+    },
+    {
+      $unwind: {
+        path: '$assignment',
+        preserveNullAndEmptyArrays: true,
+      },
+    },
+    {
+      $lookup: {
+        from: 'users',
+        localField: 'userId',
+        foreignField: '_id',
+        as: 'user',
+      },
+    },
+    {
+      $unwind: {
+        path: '$user',
+        preserveNullAndEmptyArrays: true,
+      },
+    },
+  ]);
   return results;
 }
 
 async function createResult(data, jwtUser) {
   const { userId } = jwtUser;
   const { assignmentId, questions } = data;
-  const { test, result: existingResult } = await groupsService.getAssignment(assignmentId, jwtUser);
+  const { test, result: existingResult, startDate, endDatee } = await groupsService.getAssignment(assignmentId, jwtUser);
   if (existingResult) {
     throw new ApiError(400, 'ALREADY_COMPLETED_TEST', 'This test was already completed.');
+  }
+  if ((new Date() < new Date(startDate) || new Date() > new Date(endDate))) {
+    throw new ApiError(400, 'UNAVAILABLE_TEST', 'This test is not available.');
   }
 
   let score = 0;
@@ -117,6 +185,20 @@ async function getResult(resultId) {
     {
       $unwind: {
         path: '$assignment',
+        preserveNullAndEmptyArrays: true,
+      },
+    },
+    {
+      $lookup: {
+        from: 'users',
+        localField: 'userId',
+        foreignField: '_id',
+        as: 'user',
+      },
+    },
+    {
+      $unwind: {
+        path: '$user',
         preserveNullAndEmptyArrays: true,
       },
     },
