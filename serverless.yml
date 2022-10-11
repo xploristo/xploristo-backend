@@ -12,7 +12,6 @@ provider:
   name: aws
   runtime: nodejs16.x
   region: eu-west-1
-  timeout: 30
   environment:
     NODE_OPTIONS: --experimental-json-modules
     # https://www.serverless.com/plugins/serverless-dotenv-plugin
