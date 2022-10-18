@@ -81,24 +81,28 @@ async function getResults(jwtUser) {
 async function createResult(data, jwtUser) {
   const { userId } = jwtUser;
   const { assignmentId, questions } = data;
-  const { test, result: existingResult, startDate, endDatee } = await groupsService.getAssignment(assignmentId, jwtUser);
+  const {
+    test,
+    result: existingResult,
+    startDate,
+    endDate,
+  } = await groupsService.getAssignment(assignmentId, jwtUser);
   if (existingResult) {
     throw new ApiError(400, 'ALREADY_COMPLETED_TEST', 'This test was already completed.');
   }
-  if ((new Date() < new Date(startDate) || new Date() > new Date(endDate))) {
+  if (new Date() < new Date(startDate) || new Date() > new Date(endDate)) {
     throw new ApiError(400, 'UNAVAILABLE_TEST', 'This test is not available.');
   }
 
   let score = 0;
   let correctAnswersCount = 0;
   questions.forEach((question) => {
+    const { answers, type, index } = question;
     let isAnswerCorrect = false;
-    const testQuestion = test.questions.find(
-      (testQuestion) => testQuestion.index === question.index
-    );
+    const testQuestion = test.questions.find((testQuestion) => testQuestion.index === index);
 
-    if (['singleChoice', 'multiChoice'].includes(question.type)) {
-      const studentAnswers = question.answers.filter((answer) => answer.correct);
+    if (['singleChoice', 'multiChoice'].includes(type)) {
+      const studentAnswers = answers.filter((answer) => answer.correct);
       const correctAnswers = testQuestion.answers.filter((answer) => answer.correct);
 
       if (studentAnswers.length === correctAnswers.length) {
@@ -106,15 +110,33 @@ async function createResult(data, jwtUser) {
           studentAnswers.find((studentAnswer) => studentAnswer.index === correctAnswer.index)
         );
       }
+      question.answers = answers.map((answer) => {
+        const testAnswer = testQuestion.answers.find(
+          (testAnswer) => testAnswer.index === answer.index
+        );
+        answer.correctAnswer = {
+          correct: testAnswer.correct === answer.correct,
+          value: testAnswer.correct,
+        };
+        return answer;
+      });
     } else {
-      const studentAnswer = question.answers[0];
+      const studentAnswer = answers[0];
       const correctAnswer = testQuestion.answers[0];
 
       // TODO Better comparison
-      if (question.type === 'selection') {
+      if (type === 'selection') {
         isAnswerCorrect = studentAnswer.answer.textSelection === correctAnswer.answer.textSelection;
-      } else if (question.type === 'text') {
+        question.answers[0].correctAnswer = {
+          correct: isAnswerCorrect,
+          value: correctAnswer.answer.textSelection,
+        };
+      } else if (type === 'text') {
         isAnswerCorrect = studentAnswer.answer === correctAnswer.answer;
+        question.answers[0].correctAnswer = {
+          correct: isAnswerCorrect,
+          value: correctAnswer.answer,
+        };
       }
     }
 
