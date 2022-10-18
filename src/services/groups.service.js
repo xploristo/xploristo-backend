@@ -68,6 +68,35 @@ async function getGroup(groupId, jwtUser) {
         },
       }
     );
+  } else {
+    assignmentAggregate.push({
+      $lookup: {
+        from: 'results',
+        let: { assignmentId: '$_id' },
+        pipeline: [
+          {
+            $match: {
+              $expr: { $eq: ['$assignmentId', '$$assignmentId'] },
+            },
+          },
+          {
+            $lookup: {
+              from: 'users',
+              localField: 'userId',
+              foreignField: '_id',
+              as: 'user',
+            },
+          },
+          {
+            $unwind: {
+              path: '$user',
+              preserveNullAndEmptyArrays: true,
+            },
+          },
+        ],
+        as: 'results',
+      },
+    });
   }
   const aggregate = [
     {

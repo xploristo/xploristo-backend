@@ -81,11 +81,16 @@ async function getResults(jwtUser) {
 async function createResult(data, jwtUser) {
   const { userId } = jwtUser;
   const { assignmentId, questions } = data;
-  const { test, result: existingResult, startDate, endDatee } = await groupsService.getAssignment(assignmentId, jwtUser);
+  const {
+    test,
+    result: existingResult,
+    startDate,
+    endDate,
+  } = await groupsService.getAssignment(assignmentId, jwtUser);
   if (existingResult) {
     throw new ApiError(400, 'ALREADY_COMPLETED_TEST', 'This test was already completed.');
   }
-  if ((new Date() < new Date(startDate) || new Date() > new Date(endDate))) {
+  if (new Date() < new Date(startDate) || new Date() > new Date(endDate)) {
     throw new ApiError(400, 'UNAVAILABLE_TEST', 'This test is not available.');
   }
 
