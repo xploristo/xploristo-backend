@@ -7,7 +7,7 @@ const testSchema = new mongoose.Schema(
       type: { type: String, default: 'application/pdf' },
       path: { type: String, required: true },
     },
-    questions: { type: Object },
+    questions: { type: Object, default: [] },
   },
   {
     timestamps: true,
