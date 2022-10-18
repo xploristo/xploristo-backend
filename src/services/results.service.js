@@ -118,6 +118,7 @@ async function createResult(data, jwtUser) {
           correct: testAnswer.correct === answer.correct,
           value: testAnswer.correct,
         };
+        return answer;
       });
     } else {
       const studentAnswer = answers[0];
