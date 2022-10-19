@@ -16,19 +16,25 @@ const permissions = {
 
 async function createUser(data) {
   // TODO Validate email
-  const { email, role } = data;
+  const { email, role, password } = data;
 
   const doesUserExist = await User.exists({ email });
   if (doesUserExist) {
     throw new ApiError(400, 'DUPLICATE_USER_EMAIL', 'A user already exists with given email');
   }
 
-  const { _id: credentialsId, password } = await authService.createCredentials(email, role);
+  const { _id: credentialsId, password: generatedPassword } = await authService.createCredentials(
+    email,
+    role,
+    password
+  );
 
-  try {
-    await mailService.sendPasswordEmail(email, password);
-  } catch (error) {
-    throw new ApiError(500, 'EMAIL_NOT_SENT', error.message);
+  if (!password) {
+    try {
+      await mailService.sendPasswordEmail(email, generatedPassword);
+    } catch (error) {
+      throw new ApiError(500, 'EMAIL_NOT_SENT', error.message);
+    }
   }
 
   return await User.create({ ...data, credentialsId });
