@@ -44,7 +44,7 @@ async function getUser(userId) {
 }
 
 async function updateUser(userId, data) {
-  const user = await User.findOneAndUpdate(userId, data, { new: true, upsert: true });
+  const user = await User.findOneAndUpdate({ _id: userId }, data, { new: true, upsert: true });
   return user;
 }
 

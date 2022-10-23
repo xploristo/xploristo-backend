@@ -161,7 +161,11 @@ async function createGroup(data, teacherId) {
 async function updateGroup(groupId, data) {
   let { name } = data;
 
-  const group = await Group.findOneAndUpdate(groupId, { name }, { new: true, upsert: true });
+  const group = await Group.findOneAndUpdate(
+    { _id: groupId },
+    { name },
+    { new: true, upsert: true }
+  );
   return group;
 }
 
@@ -221,7 +225,7 @@ async function updateAssignment(assignmentId, data) {
     assignmentData.endDate = endDate;
   }
 
-  const assignment = await Assignment.findOneAndUpdate(assignmentId, assignmentData, {
+  const assignment = await Assignment.findOneAndUpdate({ _id: assignmentId }, assignmentData, {
     new: true,
     upsert: true,
   });

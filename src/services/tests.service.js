@@ -33,7 +33,7 @@ async function createTest(data) {
 async function updateTest(testId, data) {
   const { name, questions } = data;
 
-  const test = await Test.findOneAndUpdate(testId, { name, questions });
+  const test = await Test.findOneAndUpdate({ _id: testId }, { name, questions });
   return test;
 }
 
@@ -50,7 +50,7 @@ async function updateTestDocument(testId, document) {
     const oldPath = oldTest.document.path;
     await s3Service.deleteDocument(documentPath(testId, oldPath));
 
-    const test = await Test.findOneAndUpdate(testId, { document });
+    const test = await Test.findOneAndUpdate({ _id: testId }, { document });
 
     return { ...test.toJSON(), documentUploadUrl };
   } catch (error) {
