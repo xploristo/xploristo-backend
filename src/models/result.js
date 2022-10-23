@@ -8,7 +8,6 @@ const resultsSchema = new mongoose.Schema(
     questions: { type: Object },
     score: { type: Number },
     correctAnswersCount: { type: Number },
-    date: { type: Date },
   },
   {
     timestamps: true,

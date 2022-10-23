@@ -144,7 +144,7 @@ async function getGroup(groupId, jwtUser) {
 async function getGroups(userId) {
   const groups = await Group.find({
     $or: [{ teacherIds: ObjectId(userId) }, { studentIds: ObjectId(userId) }],
-  });
+  }).sort({ updatedAt: -1 });
 
   return groups;
 }

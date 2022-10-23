@@ -7,7 +7,7 @@ import ApiError from '../helpers/api-error.js';
 const documentPath = (testId, path) => `${testId}/${path}`;
 
 async function getTests() {
-  const tests = await Test.find({});
+  const tests = await Test.find({}).sort({ updatedAt: -1 });
   return tests;
 }
 
