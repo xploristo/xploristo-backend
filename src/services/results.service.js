@@ -81,16 +81,19 @@ async function getResults(jwtUser) {
 async function createResult(data, jwtUser) {
   const { userId } = jwtUser;
   const { assignmentId, questions } = data;
-  const {
-    test,
-    result: existingResult,
-    startDate,
-    endDate,
-  } = await groupsService.getAssignment(assignmentId, jwtUser);
+  const assignment = await groupsService.getAssignment(assignmentId, jwtUser);
+  const { test, result: existingResult } = assignment;
   if (existingResult) {
     throw new ApiError(400, 'ALREADY_COMPLETED_TEST', 'This test was already completed.');
   }
-  if (new Date() < new Date(startDate) || new Date() > new Date(endDate)) {
+
+  const isDateWithinInterval = ({ startDate, endDate }, date = new Date()) => {
+    if (!startDate && !endDate) return true;
+    if (!startDate) return date < new Date(endDate);
+    if (!endDate) return date > new Date(startDate);
+    return date > new Date(startDate) && date < new Date(endDate);
+  };
+  if (!isDateWithinInterval(assignment)) {
     throw new ApiError(400, 'UNAVAILABLE_TEST', 'This test is not available.');
   }
 
