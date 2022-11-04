@@ -27,26 +27,34 @@ const jwtSecret = process.env.JWT_SECRET;
  *
  * @returns The credentials' _id and the generated password.
  */
-async function createCredentials(email, role) {
-  const generatedPassword = _generatePassword();
-  const password = await _hashPassword(generatedPassword);
+async function createCredentials(email, role, password) {
+  const generatedPassword = password || _generatePassword();
+  const hashedPassword = await _hashPassword(generatedPassword);
 
   const credentials = await Credentials.create({
     email,
-    password,
+    password: hashedPassword,
     role,
   });
 
   return { _id: credentials._id, password: generatedPassword };
 }
 
-async function setPassword(userId, password) {
+async function setPassword(userId, { oldPassword, password }) {
+  const user = await usersService.getUser(userId);
+
+  const { credentialsId } = user;
+  const credentials = await Credentials.findById(credentialsId);
+
+  const didPasswordMatch = await bcryptjs.compare(oldPassword, credentials.password);
+  if (!didPasswordMatch) {
+    throw new ApiError(400, 'WRONG_PASSWORD', 'Wrong password');
+  }
+
   const hashedPassword = await _hashPassword(password);
-  const user = await usersService.getUserProfile(userId);
-  const { email } = user;
 
   await Credentials.findOneAndUpdate(
-    { email },
+    { _id: credentialsId },
     { password: hashedPassword, mustResetPassword: false }
   );
 }

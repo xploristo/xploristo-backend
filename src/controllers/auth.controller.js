@@ -34,10 +34,9 @@ async function logout(req, res) {
 }
 
 async function setPassword(req, res) {
-  const { password } = req.body;
   const { userId } = req.jwtUser;
 
-  await authService.setPassword(userId, password);
+  await authService.setPassword(userId, req.body);
 
   res.sendStatus(200);
 }
