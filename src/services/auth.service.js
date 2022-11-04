@@ -41,13 +41,10 @@ async function createCredentials(email, role, password) {
 }
 
 async function setPassword(userId, { oldPassword, password }) {
-  const user = await usersService.getUserProfile(userId);
-  if (!user) {
-    throw new ApiError(400, 'USER_NOT_FOUND', 'No user was found with provided id.');
-  }
+  const user = await usersService.getUser(userId);
 
-  const { email } = user;
-  const credentials = await Credentials.findOne({ email });
+  const { credentialsId } = user;
+  const credentials = await Credentials.findById(credentialsId);
 
   const didPasswordMatch = await bcryptjs.compare(oldPassword, credentials.password);
   if (!didPasswordMatch) {
@@ -57,7 +54,7 @@ async function setPassword(userId, { oldPassword, password }) {
   const hashedPassword = await _hashPassword(password);
 
   await Credentials.findOneAndUpdate(
-    { email },
+    { _id: credentialsId },
     { password: hashedPassword, mustResetPassword: false }
   );
 }
