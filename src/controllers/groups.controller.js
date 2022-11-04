@@ -9,9 +9,7 @@ async function getGroup(req, res) {
 }
 
 async function getGroups(req, res) {
-  const { userId } = req.jwtUser;
-
-  const groups = await groupsService.getGroups(userId);
+  const groups = await groupsService.getGroups(req.jwtUser);
 
   if (!groups || !groups.length) {
     return res.status(204).json(groups);

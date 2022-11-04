@@ -6,10 +6,12 @@ import authService from './auth.service.js';
 import mailService from './mail.service.js';
 import groupsService from './groups.service.js';
 
+import adminPermissions from '../config/front-permissions/admin.json' assert { type: 'json' };
 import studentPermissions from '../config/front-permissions/student.json' assert { type: 'json' };
 import teacherPermissions from '../config/front-permissions/teacher.json' assert { type: 'json' };
 
 const permissions = {
+  admin: adminPermissions,
   student: studentPermissions,
   teacher: teacherPermissions,
 };

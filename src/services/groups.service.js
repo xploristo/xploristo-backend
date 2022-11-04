@@ -141,10 +141,16 @@ async function getGroup(groupId, jwtUser) {
   throw new ApiError(404, 'GROUP_NOT_FOUND', `Group not found with id ${groupId}.`);
 }
 
-async function getGroups(userId) {
-  const groups = await Group.find({
-    $or: [{ teacherIds: ObjectId(userId) }, { studentIds: ObjectId(userId) }],
-  }).sort({ updatedAt: -1 });
+async function getGroups(jwtUser) {
+  const { userId, role } = jwtUser;
+  const query =
+    role === 'admin'
+      ? {}
+      : role === 'teacher'
+      ? { teacherIds: ObjectId(userId) }
+      : { studentIds: ObjectId(userId) };
+
+  const groups = await Group.find(query).sort({ updatedAt: -1 });
 
   return groups;
 }
