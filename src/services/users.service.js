@@ -56,6 +56,19 @@ async function updateUser(userId, data) {
   return user;
 }
 
+async function updateUserRole(userId, role) {
+  if (!['teacher', 'admin'].includes(role)) {
+    throw new ApiError(400, 'WRONG_ROLE', 'Wrong role.');
+  }
+
+  const user = await User.findOneAndUpdate({ _id: userId }, { role }, { new: true });
+  const { credentialsId } = user;
+
+  await authService.updateCredentialsRole(credentialsId, role);
+
+  return user;
+}
+
 async function deleteUser(userId, groupId) {
   const user = await User.findById(userId);
   if (!user) {
@@ -149,8 +162,10 @@ async function getUserProfile(userId) {
   };
 }
 
-async function getTeachers(userId) {
-  const teachers = await User.find({ role: 'teacher', _id: { $ne: userId } });
+async function getTeachers(shouldGetAdmins = false) {
+  const query = shouldGetAdmins ? { role: { $in: ['teacher', 'admin'] } } : { role: 'teacher' };
+
+  const teachers = await User.find(query);
   return teachers;
 }
 
@@ -163,6 +178,7 @@ export default {
   createUser,
   getUser,
   updateUser,
+  updateUserRole,
   deleteUser,
   enrollStudent,
   removeStudentsFromGroup,

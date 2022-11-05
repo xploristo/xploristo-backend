@@ -1,3 +1,4 @@
+import { parseStringToBoolean } from '../helpers/parsers.js';
 import usersService from '../services/users.service.js';
 
 async function createUser(req, res) {
@@ -22,6 +23,16 @@ async function updateUser(req, res) {
   res.status(200).json(user);
 }
 
+async function updateUserRole(req, res) {
+  // FIXME Only allow admins to call this endpoint!
+  const { userId } = req.params;
+  const { role } = req.body;
+
+  const user = await usersService.updateUserRole(userId, role);
+
+  res.status(200).json(user);
+}
+
 async function deleteUser(req, res) {
   const { userId } = req.params;
   const { groupId } = req.query;
@@ -40,9 +51,9 @@ async function getUserProfile(req, res) {
 }
 
 async function getTeachers(req, res) {
-  const { userId } = req.jwtUser;
+  const shouldGetAdmins = parseStringToBoolean(req.query.admins);
 
-  const teachers = await usersService.getTeachers(userId);
+  const teachers = await usersService.getTeachers(shouldGetAdmins);
 
   if (!teachers || !teachers.length) {
     return res.status(204).json(teachers);
@@ -67,6 +78,7 @@ export default {
   createUser,
   getUser,
   updateUser,
+  updateUserRole,
   deleteUser,
   getUserProfile,
   getTeachers,
