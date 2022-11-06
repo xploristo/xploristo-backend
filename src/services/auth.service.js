@@ -40,6 +40,10 @@ async function createCredentials(email, role, password) {
   return { _id: credentials._id, password: generatedPassword };
 }
 
+async function updateCredentialsRole(credentialsId, role) {
+  await Credentials.updateOne({ _id: credentialsId }, { role });
+}
+
 async function setPassword(userId, { oldPassword, password }) {
   const user = await usersService.getUser(userId);
 
@@ -153,6 +157,7 @@ async function clearSessionData(jwToken) {
 
 export default {
   createCredentials,
+  updateCredentialsRole,
   setPassword,
   login,
   verifyToken,

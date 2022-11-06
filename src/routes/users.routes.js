@@ -8,6 +8,7 @@ export default express
   .post('/', asyncErrorHandler(usersController.createUser))
   .get('/:userId([0-9a-fA-F]{24})', asyncErrorHandler(usersController.getUser))
   .put('/:userId([0-9a-fA-F]{24})', asyncErrorHandler(usersController.updateUser))
+  .put('/:userId([0-9a-fA-F]{24})/role', asyncErrorHandler(usersController.updateUserRole))
   .delete('/:userId([0-9a-fA-F]{24})', asyncErrorHandler(usersController.deleteUser))
   .get('/profile', asyncErrorHandler(usersController.getUserProfile))
   .get('/teachers', asyncErrorHandler(usersController.getTeachers))

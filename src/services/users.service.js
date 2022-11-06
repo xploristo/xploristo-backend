@@ -6,10 +6,12 @@ import authService from './auth.service.js';
 import mailService from './mail.service.js';
 import groupsService from './groups.service.js';
 
+import adminPermissions from '../config/front-permissions/admin.json' assert { type: 'json' };
 import studentPermissions from '../config/front-permissions/student.json' assert { type: 'json' };
 import teacherPermissions from '../config/front-permissions/teacher.json' assert { type: 'json' };
 
 const permissions = {
+  admin: adminPermissions,
   student: studentPermissions,
   teacher: teacherPermissions,
 };
@@ -51,6 +53,19 @@ async function getUser(userId) {
 
 async function updateUser(userId, data) {
   const user = await User.findOneAndUpdate({ _id: userId }, data, { new: true, upsert: true });
+  return user;
+}
+
+async function updateUserRole(userId, role) {
+  if (!['teacher', 'admin'].includes(role)) {
+    throw new ApiError(400, 'WRONG_ROLE', 'Wrong role.');
+  }
+
+  const user = await User.findOneAndUpdate({ _id: userId }, { role }, { new: true });
+  const { credentialsId } = user;
+
+  await authService.updateCredentialsRole(credentialsId, role);
+
   return user;
 }
 
@@ -147,8 +162,10 @@ async function getUserProfile(userId) {
   };
 }
 
-async function getTeachers(userId) {
-  const teachers = await User.find({ role: 'teacher', _id: { $ne: userId } });
+async function getTeachers(shouldGetAdmins = false) {
+  const query = shouldGetAdmins ? { role: { $in: ['teacher', 'admin'] } } : { role: 'teacher' };
+
+  const teachers = await User.find(query);
   return teachers;
 }
 
@@ -161,6 +178,7 @@ export default {
   createUser,
   getUser,
   updateUser,
+  updateUserRole,
   deleteUser,
   enrollStudent,
   removeStudentsFromGroup,
