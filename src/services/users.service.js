@@ -1,6 +1,7 @@
 import { ObjectId } from 'mongodb';
 
 import ApiError from '../helpers/api-error.js';
+import { validateEmail } from '../helpers/validators.js';
 import { User } from '../models/user.js';
 import authService from './auth.service.js';
 import mailService from './mail.service.js';
@@ -17,8 +18,8 @@ const permissions = {
 };
 
 async function createUser(data) {
-  // TODO Validate email
   const { email, role, password } = data;
+  validateEmail(email);
 
   const doesUserExist = await User.exists({ email });
   if (doesUserExist) {
@@ -52,6 +53,10 @@ async function getUser(userId) {
 }
 
 async function updateUser(userId, data) {
+  if (data.email) {
+    validateEmail(data.email);
+  }
+
   const user = await User.findOneAndUpdate({ _id: userId }, data, { new: true, upsert: true });
   return user;
 }
