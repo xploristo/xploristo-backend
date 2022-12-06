@@ -44,7 +44,15 @@ async function updateCredentialsRole(credentialsId, role) {
   await Credentials.updateOne({ _id: credentialsId }, { role });
 }
 
-async function setPassword(userId, { oldPassword, password }) {
+async function setPassword(userId, { oldPassword, password, confirmPassword }) {
+  if (password !== confirmPassword) {
+    throw new ApiError(
+      400,
+      'PASSWORDS_DO_NOT_MATCH',
+      'New password does not match confirm password.'
+    );
+  }
+
   const user = await usersService.getUser(userId);
 
   const { credentialsId } = user;
@@ -53,6 +61,14 @@ async function setPassword(userId, { oldPassword, password }) {
   const didPasswordMatch = await bcryptjs.compare(oldPassword, credentials.password);
   if (!didPasswordMatch) {
     throw new ApiError(400, 'WRONG_PASSWORD', 'Wrong password');
+  }
+
+  if (oldPassword === password) {
+    throw new ApiError(
+      400,
+      'PASSWORD_DID_NOT_CHANGE',
+      'New password must be different from old password.'
+    );
   }
 
   const hashedPassword = await _hashPassword(password);
