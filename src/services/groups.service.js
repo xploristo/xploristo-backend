@@ -5,7 +5,11 @@ import { Assignment } from '../models/assignment.js';
 import usersService from './users.service.js';
 import ApiError from '../helpers/api-error.js';
 
-async function getGroup(groupId, jwtUser) {
+async function getGroup(groupId, jwtUser, populate = true) {
+  if (!populate) {
+    return await Group.findById(groupId);
+  }
+
   const assignmentAggregate = [
     {
       $match: {

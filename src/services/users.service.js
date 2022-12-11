@@ -18,7 +18,7 @@ const permissions = {
 };
 
 async function createUser(data) {
-  const { email, role, password } = data;
+  const { email, role, password, groupIds } = data;
   validateEmail(email);
 
   const doesUserExist = await User.exists({ email });
@@ -34,7 +34,11 @@ async function createUser(data) {
 
   if (!password) {
     try {
-      await mailService.sendPasswordEmail(email, generatedPassword);
+      await mailService.sendPasswordEmail(email, {
+        password: generatedPassword,
+        role,
+        groupId: groupIds[0],
+      });
     } catch (error) {
       throw new ApiError(500, 'EMAIL_NOT_SENT', error.message);
     }
