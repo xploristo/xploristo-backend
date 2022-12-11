@@ -9,15 +9,22 @@ import { Credentials } from '../models/credentials.js';
 import redisService from './redis.service.js';
 import usersService from './users.service.js';
 
-const uuidNamespace = process.env.UUID_NAMESPACE;
+let uuidNamespace;
+let sessionTTL;
+let jwtOptions;
+let jwtSecret;
 
-const sessionTTL = process.env.SESSION_TTL;
-const jwtOptions = {
-  expiresIn: sessionTTL + 's',
-  audience: 'xploristo',
-  issuer: 'xploristo-backend',
-};
-const jwtSecret = process.env.JWT_SECRET;
+function bootstrap() {
+  uuidNamespace = process.env.UUID_NAMESPACE;
+
+  sessionTTL = process.env.SESSION_TTL;
+  jwtOptions = {
+    expiresIn: sessionTTL + 's',
+    audience: 'xploristo',
+    issuer: 'xploristo-backend',
+  };
+  jwtSecret = process.env.JWT_SECRET;
+}
 
 /**
  * Creates credentials for user with given email and role.
@@ -176,6 +183,7 @@ async function clearSessionData(jwToken) {
 }
 
 export default {
+  bootstrap,
   createCredentials,
   updateCredentialsRole,
   setPassword,

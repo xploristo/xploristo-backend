@@ -4,9 +4,10 @@ import aws from 'aws-sdk';
 
 let s3;
 
-const documentsBucketName = process.env.DOCUMENTS_BUCKET_NAME;
+let documentsBucketName;
 
 function bootstrap(awsConfig) {
+  documentsBucketName = process.env.DOCUMENTS_BUCKET_NAME;
   if (!s3) {
     s3 = new aws.S3(awsConfig);
   }
