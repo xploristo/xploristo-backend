@@ -40,6 +40,10 @@ async function createCredentials(email, role, password) {
   return { _id: credentials._id, password: generatedPassword };
 }
 
+async function deleteCredentials(credentialsId) {
+  await Credentials.remove({ _id: credentialsId });
+}
+
 async function updateCredentialsRole(credentialsId, role) {
   await Credentials.updateOne({ _id: credentialsId }, { role });
 }
@@ -178,4 +182,5 @@ export default {
   login,
   verifyToken,
   clearSessionData,
+  deleteCredentials,
 };

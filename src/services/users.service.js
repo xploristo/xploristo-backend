@@ -94,6 +94,7 @@ async function deleteUser(userId, groupId) {
     }
 
     if (user.groupIds.length > 1) {
+      // TODO Teachers?
       await User.updateOne({ _id: userId }, { $pull: { groupIds: ObjectId(groupId) } });
       await groupsService.removeUserFromGroups(userId);
       return;
@@ -102,6 +103,7 @@ async function deleteUser(userId, groupId) {
 
   await User.remove({ _id: userId });
   await groupsService.removeUserFromGroups(userId);
+  await authService.deleteCredentials(user.credentialsId);
 }
 
 async function enrollStudent(groupId, studentData) {
