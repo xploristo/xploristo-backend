@@ -20,6 +20,7 @@
     "lint": "npx eslint . --ext js,json",
     "lint:fix": "npx eslint . --ext js,json --fix",
     "nodemon": "nodemon --exec serverless offline",
+    "nodemon:server": "nodemon --exec NODE_ENV=development node --experimental-json-modules ./server.js",
     "start:server": "NODE_ENV=development node --experimental-json-modules ./server.js",
     "start:dev": "serverless offline",
     "test": "echo \"Error: no test specified\" && exit 1"

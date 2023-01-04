@@ -7,4 +7,5 @@ export default express
   .Router()
   .post('/', asyncErrorHandler(authController.login))
   .delete('/', asyncErrorHandler(authController.logout))
-  .put('/password', asyncErrorHandler(authController.setPassword));
+  .put('/password', asyncErrorHandler(authController.setPassword))
+  .delete('/password', asyncErrorHandler(authController.resetPassword));

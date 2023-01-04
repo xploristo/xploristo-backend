@@ -86,7 +86,6 @@ async function startServer() {
   dotenv.config({ path: `.env.${process.env.NODE_ENV}.local` });
   dotenv.config({ path: `.env.${process.env.NODE_ENV}` });
   dotenv.config({ path: '.env' });
-  console.log('process.env', process.env);
 
   await start();
   await new Promise((resolve) => {

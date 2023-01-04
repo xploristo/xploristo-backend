@@ -41,8 +41,17 @@ async function setPassword(req, res) {
   res.sendStatus(200);
 }
 
+async function resetPassword(req, res) {
+  const { userId, email } = req.query;
+
+  await authService.resetPassword({ userId, email });
+
+  res.sendStatus(200);
+}
+
 export default {
   login,
   logout,
   setPassword,
+  resetPassword,
 };

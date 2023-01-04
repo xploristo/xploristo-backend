@@ -8,6 +8,7 @@ import ApiError from '../helpers/api-error.js';
 import { Credentials } from '../models/credentials.js';
 import redisService from './redis.service.js';
 import usersService from './users.service.js';
+import mailService from './mail.service.js';
 
 let uuidNamespace;
 let sessionTTL;
@@ -88,6 +89,34 @@ async function setPassword(userId, { oldPassword, password, confirmPassword }) {
     { _id: credentialsId },
     { password: hashedPassword, mustResetPassword: false }
   );
+}
+
+async function resetPassword({ userId, email }) {
+  let credentials;
+
+  if (userId) {
+    const user = await usersService.getUser(userId);
+    credentials = await Credentials.findById(user.credentialsId);
+    email = user.email;
+  } else if (email) {
+    credentials = await Credentials.findOne({ email });
+  } else {
+    throw new ApiError(
+      400,
+      'ID_OR_EMAIL_REQUIRED',
+      "User's id or email is required to reset their password."
+    );
+  }
+
+  const generatedPassword = _generatePassword();
+  const hashedPassword = await _hashPassword(generatedPassword);
+
+  await Credentials.updateOne(
+    { _id: credentials._id },
+    { password: hashedPassword, mustResetPassword: true }
+  );
+
+  await mailService.sendResetPasswordEmail(email, { password: generatedPassword });
 }
 
 async function _hashPassword(password) {
@@ -187,6 +216,7 @@ export default {
   createCredentials,
   updateCredentialsRole,
   setPassword,
+  resetPassword,
   login,
   verifyToken,
   clearSessionData,
