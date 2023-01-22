@@ -1,6 +1,15 @@
 import assignmentsService from '../services/assignments.service.js';
+import ApiError from '../helpers/api-error.js';
+
+function checkUserRole(jwtUser) {
+  if (!jwtUser.role === 'student') {
+    throw new ApiError(403, 'FORBIDDEN', `You are not allowed to perform this action.`);
+  }
+}
 
 async function createAssignment(req, res) {
+  checkUserRole(req.jwtUser);
+
   // TODO Validate body (Joi?)
   const { groupId } = req.params;
 
@@ -10,6 +19,8 @@ async function createAssignment(req, res) {
 }
 
 async function updateAssignment(req, res) {
+  checkUserRole(req.jwtUser);
+
   // TODO Validate body (Joi?)
   const { assignmentId } = req.params;
 
@@ -19,6 +30,8 @@ async function updateAssignment(req, res) {
 }
 
 async function deleteAssignment(req, res) {
+  checkUserRole(req.jwtUser);
+
   const { assignmentId } = req.params;
 
   await assignmentsService.deleteAssignment(assignmentId);
