@@ -28,6 +28,7 @@
     "create": true,
     "delete": true,
     "edit": true,
-    "list": true
+    "list": true,
+    "preview": true
   }
 }
