@@ -1,6 +1,7 @@
 import express from 'express';
 
 import groupsController from '../controllers/groups.controller.js';
+import assignmentsController from '../controllers/assignments.controller.js';
 import asyncErrorHandler from '../middlewares/async-error-handler.js';
 
 export default express
@@ -10,21 +11,25 @@ export default express
   .get('/:groupId([0-9a-fA-F]{24})', asyncErrorHandler(groupsController.getGroup))
   .put('/:groupId([0-9a-fA-F]{24})', asyncErrorHandler(groupsController.updateGroup))
   .delete('/:groupId([0-9a-fA-F]{24})', asyncErrorHandler(groupsController.deleteGroup))
+  .post('/:groupId([0-9a-fA-F]{24})/students', asyncErrorHandler(groupsController.enrollStudents))
+  // Assignments
+  .get(
+    '/:groupId([0-9a-fA-F]{24})/assignments',
+    asyncErrorHandler(assignmentsController.getAssignments)
+  )
   .post(
     '/:groupId([0-9a-fA-F]{24})/assignments',
-    asyncErrorHandler(groupsController.createAssignment)
+    asyncErrorHandler(assignmentsController.createAssignment)
+  )
+  .get(
+    '/:groupId([0-9a-fA-F]{24})/assignments/:assignmentId([0-9a-fA-F]{24})',
+    asyncErrorHandler(assignmentsController.getAssignment)
   )
   .put(
     '/:groupId([0-9a-fA-F]{24})/assignments/:assignmentId([0-9a-fA-F]{24})',
-    asyncErrorHandler(groupsController.updateAssignment)
+    asyncErrorHandler(assignmentsController.updateAssignment)
   )
   .delete(
     '/:groupId([0-9a-fA-F]{24})/assignments/:assignmentId([0-9a-fA-F]{24})',
-    asyncErrorHandler(groupsController.deleteAssignment)
-  )
-  .get('/:groupId([0-9a-fA-F]{24})/assignments', asyncErrorHandler(groupsController.getAssignments))
-  .get(
-    '/:groupId([0-9a-fA-F]{24})/assignments/:assignmentId([0-9a-fA-F]{24})',
-    asyncErrorHandler(groupsController.getAssignment)
-  )
-  .post('/:groupId([0-9a-fA-F]{24})/students', asyncErrorHandler(groupsController.enrollStudents));
+    asyncErrorHandler(assignmentsController.deleteAssignment)
+  );
