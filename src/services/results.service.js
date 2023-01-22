@@ -2,7 +2,7 @@ import { ObjectId } from 'mongodb';
 
 import { Result } from '../models/result.js';
 import ApiError from '../helpers/api-error.js';
-import groupsService from '../services/groups.service.js';
+import assignmentsService from '../services/assignments.service.js';
 
 async function getResults(jwtUser) {
   let query = {};
@@ -81,7 +81,7 @@ async function getResults(jwtUser) {
 async function createResult(data, jwtUser) {
   const { userId } = jwtUser;
   const { assignmentId, questions } = data;
-  const assignment = await groupsService.getAssignment(assignmentId, jwtUser);
+  const assignment = await assignmentsService.getAssignment(assignmentId, jwtUser);
   const { test, result: existingResult } = assignment;
   if (existingResult) {
     throw new ApiError(400, 'ALREADY_COMPLETED_TEST', 'This test was already completed.');
