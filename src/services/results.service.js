@@ -84,7 +84,11 @@ async function createResult(data, jwtUser) {
   const assignment = await assignmentsService.getAssignment(assignmentId, jwtUser);
   const { test, result: existingResult } = assignment;
   if (existingResult) {
-    throw new ApiError(400, 'ALREADY_COMPLETED_TEST', 'This test was already completed.');
+    throw new ApiError(
+      400,
+      'ALREADY_COMPLETED_ASSIGNMENT',
+      'This assignment was already completed.'
+    );
   }
 
   const isDateWithinInterval = ({ startDate, endDate }, date = new Date()) => {
@@ -94,7 +98,7 @@ async function createResult(data, jwtUser) {
     return date > new Date(startDate) && date < new Date(endDate);
   };
   if (!isDateWithinInterval(assignment)) {
-    throw new ApiError(400, 'UNAVAILABLE_TEST', 'This test is not available.');
+    throw new ApiError(400, 'UNAVAILABLE_ASSIGNMENT', 'This assignment is not available.');
   }
 
   let score = 0;

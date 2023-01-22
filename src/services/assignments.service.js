@@ -2,6 +2,7 @@ import { ObjectId } from 'mongodb';
 
 import { Assignment } from '../models/assignment.js';
 import ApiError from '../helpers/api-error.js';
+import testsService from './tests.service.js';
 
 async function createAssignment(groupId, data) {
   const { name, startDate, endDate, testId } = data;
@@ -115,63 +116,32 @@ async function getAssignments(groupId, jwtUser) {
 }
 
 async function getAssignment(assignmentId, jwtUser) {
-  const aggregate = [
-    {
-      $match: {
-        _id: ObjectId(assignmentId),
-      },
-    },
-    // TODO Do we need full test?
-    {
-      $lookup: {
-        from: 'tests',
-        localField: 'testId',
-        foreignField: '_id',
-        as: 'test',
-      },
-    },
-    {
-      $unwind: {
-        path: '$test',
-      },
-    },
-  ];
-  if (jwtUser.role === 'student') {
-    aggregate.push(
-      {
-        $lookup: {
-          from: 'results',
-          let: { assignmentId: '$_id' },
-          pipeline: [
-            {
-              $match: {
-                $expr: {
-                  $and: [
-                    { $eq: ['$assignmentId', '$$assignmentId'] },
-                    { $eq: ['$userId', ObjectId(jwtUser.userId)] },
-                  ],
-                },
-              },
-            },
-          ],
-          as: 'result',
-        },
-      },
-      {
-        $unwind: {
-          path: '$result',
-          preserveNullAndEmptyArrays: true,
-        },
-      }
+  const assignment = await Assignment.findById(assignmentId);
+
+  if (!assignment) {
+    throw new ApiError(
+      404,
+      'ASSIGNMENT_NOT_FOUND',
+      `Assignment not found with id ${assignmentId}.`
     );
   }
-  const result = await Assignment.aggregate(aggregate);
 
-  if (result && result.length) {
-    return result[0];
+  if (jwtUser.role === 'student') {
+    const isDateWithinInterval = ({ startDate, endDate }, date = new Date()) => {
+      if (!startDate && !endDate) return true;
+      if (!startDate) return date < new Date(endDate);
+      if (!endDate) return date > new Date(startDate);
+      return date > new Date(startDate) && date < new Date(endDate);
+    };
+    if (!isDateWithinInterval(assignment)) {
+      throw new ApiError(400, 'UNAVAILABLE_ASSIGNMENT', 'This assignment is not available.');
+    }
   }
 
-  throw new ApiError(404, 'ASSIGNMENT_NOT_FOUND', `Assignment not found with id ${assignmentId}.`);
+  // TODO Do we need full test?
+  const test = await testsService.getTest(assignment.testId);
+
+  return { ...assignment, test };
 }
 
 export default {
