@@ -139,9 +139,9 @@ async function getAssignment(assignmentId, jwtUser) {
   }
 
   // TODO Do we need full test?
-  const test = await testsService.getTest(assignment.testId);
+  const test = await testsService.getTest(assignment.testId, jwtUser);
 
-  return { ...assignment, test };
+  return { ...assignment.toJSON(), test };
 }
 
 export default {
