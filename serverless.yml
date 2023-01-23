@@ -15,6 +15,12 @@ provider:
   environment:
     NODE_OPTIONS: --experimental-json-modules
     # https://www.serverless.com/plugins/serverless-dotenv-plugin
+  httpApi:
+    cors:
+      allowedOrigins:
+        - http://xploristo.s3-website-eu-west-1.amazonaws.com
+      allowCredentials: true
+      maxAge: 6000 # In seconds
    
 functions:
   app:
