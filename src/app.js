@@ -5,6 +5,7 @@ import cookieParser from 'cookie-parser';
 
 import customErrorHandler from './middlewares/custom-error-handler.js';
 import authHandler from './middlewares/auth-handler.js';
+import testAuthHandler from './middlewares/test-auth-handler.js';
 import routes from './routes/routes.js';
 import s3Service from './services/s3.service.js';
 import redisService from './services/redis.service.js';
@@ -32,7 +33,7 @@ async function start() {
 
   app.use(cookieParser());
 
-  app.use(authHandler);
+  app.use(process.env.NODE_ENV === 'test' ? testAuthHandler : authHandler);
   app.use(routes);
   app.use(customErrorHandler);
 }
@@ -124,6 +125,7 @@ const asyncHandler = async (event) => {
   return handler(event);
 };
 
+export default { app };
 export { startServer, stopServer, asyncHandler };
 
 // TODO This does not seem to work

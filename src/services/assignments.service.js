@@ -55,6 +55,7 @@ async function deleteAssignment(assignmentId) {
   await Assignment.remove({ _id: assignment });
 }
 
+// TODO This service's function is not used
 async function getAssignments(groupId, jwtUser) {
   const aggregate = [
     {
@@ -108,11 +109,7 @@ async function getAssignments(groupId, jwtUser) {
   }
   const result = await Assignment.aggregate(aggregate);
 
-  if (result && result.length) {
-    return result[0];
-  }
-
-  throw new ApiError(404, 'GROUP_NOT_FOUND', `Group not found with id ${groupId}.`);
+  return result;
 }
 
 async function getAssignment(assignmentId, jwtUser) {
