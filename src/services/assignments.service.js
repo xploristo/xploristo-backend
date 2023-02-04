@@ -17,6 +17,9 @@ async function createAssignment(groupId, data) {
   if (endDate) {
     assignmentData.endDate = endDate;
   }
+  if (startDate >= endDate) {
+    throw new ApiError(400, 'INVALID_DATES', 'Start date cannot be after end date.');
+  }
 
   const assignment = await Assignment.create(assignmentData);
 
@@ -33,6 +36,9 @@ async function updateAssignment(assignmentId, data) {
   }
   if (endDate) {
     assignmentData.endDate = endDate;
+  }
+  if (startDate >= endDate) {
+    throw new ApiError(400, 'INVALID_DATES', 'Start date cannot be after end date.');
   }
 
   const assignment = await Assignment.findOneAndUpdate({ _id: assignmentId }, assignmentData, {
