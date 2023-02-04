@@ -43,6 +43,7 @@ async function getGroup(groupId, jwtUser, populate = true) {
       },
     },
   ];
+  let usersAggregate = [];
   if (jwtUser.role === 'student') {
     assignmentAggregate.push(
       {
@@ -100,6 +101,27 @@ async function getGroup(groupId, jwtUser, populate = true) {
         as: 'results',
       },
     });
+    usersAggregate = [
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'teacherIds',
+          foreignField: '_id',
+          as: 'teachers',
+        },
+      },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'studentIds',
+          foreignField: '_id',
+          as: 'students',
+        },
+      },
+      {
+        $unset: ['teacherIds', 'studentIds'],
+      },
+    ];
   }
   const aggregate = [
     {
@@ -115,25 +137,7 @@ async function getGroup(groupId, jwtUser, populate = true) {
         as: 'assignments',
       },
     },
-    {
-      $lookup: {
-        from: 'users',
-        localField: 'teacherIds',
-        foreignField: '_id',
-        as: 'teachers',
-      },
-    },
-    {
-      $lookup: {
-        from: 'users',
-        localField: 'studentIds',
-        foreignField: '_id',
-        as: 'students',
-      },
-    },
-    {
-      $unset: ['teacherIds', 'studentIds'],
-    },
+    ...usersAggregate,
   ];
   const result = await Group.aggregate(aggregate);
 
