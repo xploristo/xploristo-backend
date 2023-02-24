@@ -93,7 +93,7 @@ async function deleteTest(testId) {
     const path = test.document.path;
     await s3Service.deleteDocument(documentPath(testId, path));
 
-    await Test.remove({ _id: testId });
+    await Test.deleteOne({ _id: testId });
   } catch (error) {
     throw new ApiError(500, 'DELETE_TEST_ERROR', error.message);
   }

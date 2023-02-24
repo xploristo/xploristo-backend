@@ -58,7 +58,7 @@ async function deleteAssignment(assignmentId) {
     );
   }
 
-  await Assignment.remove({ _id: assignment });
+  await Assignment.deleteOne({ _id: assignment });
 }
 
 // TODO This service's function is not used

@@ -189,7 +189,7 @@ async function deleteGroup(groupId) {
   }
   await usersService.removeStudentsFromGroup(groupId);
 
-  await Group.remove({ _id: groupId });
+  await Group.deleteOne({ _id: groupId });
 }
 
 async function removeUserFromGroups(userId) {

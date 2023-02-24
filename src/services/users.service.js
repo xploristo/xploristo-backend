@@ -104,7 +104,7 @@ async function deleteUser(userId, groupId) {
     }
   }
 
-  await User.remove({ _id: userId });
+  await User.deleteOne({ _id: userId });
   await groupsService.removeUserFromGroups(userId);
   await authService.deleteCredentials(user.credentialsId);
 }

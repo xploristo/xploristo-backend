@@ -49,7 +49,7 @@ async function createCredentials(email, role, password) {
 }
 
 async function deleteCredentials(credentialsId) {
-  await Credentials.remove({ _id: credentialsId });
+  await Credentials.deleteOne({ _id: credentialsId });
 }
 
 async function updateCredentialsRole(credentialsId, role) {
