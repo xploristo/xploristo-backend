@@ -37,9 +37,12 @@ async function createUser(data) {
       await mailService.sendPasswordEmail(email, {
         password: generatedPassword,
         role,
-        groupId: groupIds[0],
+        groupId: groupIds ? groupIds[0] : null,
       });
     } catch (error) {
+      // Delete created credentials, as user will no longer be created
+      await authService.deleteCredentials(credentialsId);
+
       throw new ApiError(500, 'EMAIL_NOT_SENT', error.message);
     }
   }
