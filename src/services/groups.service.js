@@ -9,6 +9,8 @@ async function getGroup(groupId, jwtUser, populate = true) {
     return await Group.findById(groupId);
   }
 
+  // TODO Paginate
+
   const assignmentAggregate = [
     {
       $match: {
@@ -207,10 +209,16 @@ async function removeUserFromGroups(userId) {
   );
 }
 
-async function enrollStudents(groupId, data) {
-  // TODO receive csv
-  const { students } = data;
-
+/**
+ * Enrolls provided students to given group.
+ *
+ * @param {string}   groupId  The group's id.
+ * @param {[object]} students Students to enroll.
+ * @param {object}   jwtUser  Requester's JWT user.
+ *
+ * @returns Populated group.
+ */
+async function enrollStudents(groupId, students, jwtUser) {
   const studentIds = await Promise.all(
     students.map(async (student) => {
       const user = await usersService.enrollStudent(groupId, student);
@@ -218,7 +226,7 @@ async function enrollStudents(groupId, data) {
     })
   );
 
-  const group = await Group.findOneAndUpdate(
+  await Group.findOneAndUpdate(
     { _id: groupId },
     {
       $addToSet: {
@@ -228,7 +236,7 @@ async function enrollStudents(groupId, data) {
     { new: true }
   );
 
-  return group;
+  return getGroup(groupId, jwtUser);
 }
 
 export default {

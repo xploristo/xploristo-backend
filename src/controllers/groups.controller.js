@@ -45,10 +45,12 @@ async function deleteGroup(req, res) {
 }
 
 async function enrollStudents(req, res) {
-  // TODO Validate body (Joi?)
+  // TODO Enroll students via CSV?
   const { groupId } = req.params;
+  // TODO Validate body (Joi?)
+  const { students } = req.body;
 
-  const group = await groupsService.enrollStudents(groupId, req.body);
+  const group = await groupsService.enrollStudents(groupId, students, req.jwtUser);
 
   res.status(200).json(group);
 }
