@@ -17,13 +17,17 @@ async function createAssignment(groupId, data) {
   if (endDate) {
     assignmentData.endDate = endDate;
   }
-  if (startDate >= endDate) {
+  if (startDate && endDate && startDate >= endDate) {
     throw new ApiError(400, 'INVALID_DATES', 'Start date cannot be after end date.');
   }
 
   const assignment = await Assignment.create(assignmentData);
 
-  return assignment;
+  const test = await testsService.getTest(testId);
+  return {
+    ...assignment.toJSON(),
+    test: { _id: test._id, name: test.name, document: test.document },
+  };
 }
 
 async function updateAssignment(assignmentId, data) {
@@ -37,7 +41,7 @@ async function updateAssignment(assignmentId, data) {
   if (endDate) {
     assignmentData.endDate = endDate;
   }
-  if (startDate >= endDate) {
+  if (startDate && endDate && startDate >= endDate) {
     throw new ApiError(400, 'INVALID_DATES', 'Start date cannot be after end date.');
   }
 
@@ -45,7 +49,12 @@ async function updateAssignment(assignmentId, data) {
     new: true,
     upsert: true,
   });
-  return assignment;
+
+  const test = await testsService.getTest(assignment.testId);
+  return {
+    ...assignment.toJSON(),
+    test: { _id: test._id, name: test.name, document: test.document },
+  };
 }
 
 async function deleteAssignment(assignmentId) {

@@ -58,7 +58,7 @@ async function updateTestDocument(testId, document) {
   }
 }
 
-async function getTest(testId, jwtUser) {
+async function getTest(testId, jwtUser = {}) {
   const test = await Test.findById(testId);
   if (!test) {
     throw new ApiError(404, 'TEST_NOT_FOUND', `Test not found with id ${testId}.`);
