@@ -2,7 +2,7 @@ import testsService from '../services/tests.service.js';
 import ApiError from '../helpers/api-error.js';
 
 function checkUserRole(jwtUser) {
-  if (!jwtUser.role === 'student') {
+  if (jwtUser.role === 'student') {
     throw new ApiError(403, 'FORBIDDEN', `You are not allowed to perform this action.`);
   }
 }
@@ -17,6 +17,22 @@ async function getTests(req, res) {
   }
 
   res.status(200).json(tests);
+}
+
+async function getTest(req, res) {
+  checkUserRole(req.jwtUser);
+
+  const test = await testsService.getTest(req.params.testId);
+
+  res.status(200).json(test);
+}
+
+async function getTestDocumentDownloadUrl(req, res) {
+  checkUserRole(req.jwtUser);
+
+  const url = await testsService.getTestDocumentDownloadUrl(req.params.testId);
+
+  res.status(200).json(url);
 }
 
 async function createTest(req, res) {
@@ -50,16 +66,6 @@ async function updateTestDocument(req, res) {
   res.status(200).json(test);
 }
 
-async function getTest(req, res) {
-  checkUserRole(req.jwtUser);
-
-  const { testId } = req.params;
-
-  const test = await testsService.getTest(testId, req.jwtUser);
-
-  res.status(200).json(test);
-}
-
 async function deleteTest(req, res) {
   checkUserRole(req.jwtUser);
 
@@ -72,9 +78,10 @@ async function deleteTest(req, res) {
 
 export default {
   getTests,
+  getTest,
+  getTestDocumentDownloadUrl,
   createTest,
   updateTest,
   updateTestDocument,
-  getTest,
   deleteTest,
 };

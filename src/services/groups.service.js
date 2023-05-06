@@ -17,33 +17,6 @@ async function getGroup(groupId, jwtUser, populate = true) {
         $expr: { $eq: ['$groupId', '$$groupId'] },
       },
     },
-    {
-      $lookup: {
-        from: 'tests',
-        let: { testId: '$testId' },
-        pipeline: [
-          {
-            $match: {
-              $expr: { $eq: ['$_id', '$$testId'] },
-            },
-          },
-          {
-            $project: {
-              _id: 1,
-              name: 1,
-              document: 1,
-            },
-          },
-        ],
-        as: 'test',
-      },
-    },
-    {
-      $unwind: {
-        path: '$test',
-        preserveNullAndEmptyArrays: true,
-      },
-    },
   ];
   let usersAggregate = [];
   if (jwtUser.role === 'student') {

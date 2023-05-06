@@ -3,74 +3,10 @@ import { ObjectId } from 'mongodb';
 import { Assignment } from '../models/assignment.js';
 import ApiError from '../helpers/api-error.js';
 import testsService from './tests.service.js';
+import documentsService from './documents.service.js';
+import s3Service from './s3.service.js';
 
-async function createAssignment(groupId, data) {
-  const { name, startDate, endDate, testId } = data;
-  let assignmentData = {
-    name,
-    groupId,
-    testId,
-  };
-  if (startDate) {
-    assignmentData.startDate = startDate;
-  }
-  if (endDate) {
-    assignmentData.endDate = endDate;
-  }
-  if (startDate && endDate && startDate >= endDate) {
-    throw new ApiError(400, 'INVALID_DATES', 'Start date cannot be after end date.');
-  }
-
-  const assignment = await Assignment.create(assignmentData);
-
-  const test = await testsService.getTest(testId);
-  return {
-    ...assignment.toJSON(),
-    test: { _id: test._id, name: test.name, document: test.document },
-  };
-}
-
-async function updateAssignment(assignmentId, data) {
-  const { name, startDate, endDate } = data;
-  let assignmentData = {
-    name,
-  };
-  if (startDate) {
-    assignmentData.startDate = startDate;
-  }
-  if (endDate) {
-    assignmentData.endDate = endDate;
-  }
-  if (startDate && endDate && startDate >= endDate) {
-    throw new ApiError(400, 'INVALID_DATES', 'Start date cannot be after end date.');
-  }
-
-  const assignment = await Assignment.findOneAndUpdate({ _id: assignmentId }, assignmentData, {
-    new: true,
-    upsert: true,
-  });
-
-  const test = await testsService.getTest(assignment.testId);
-  return {
-    ...assignment.toJSON(),
-    test: { _id: test._id, name: test.name, document: test.document },
-  };
-}
-
-async function deleteAssignment(assignmentId) {
-  const assignment = await Assignment.findById(assignmentId);
-  if (!assignment) {
-    throw new ApiError(
-      404,
-      'ASSIGNMENT_NOT_FOUND',
-      `Assignment not found with id ${assignmentId}.`
-    );
-  }
-
-  await Assignment.deleteOne({ _id: assignment });
-}
-
-// TODO This service's function is not used
+// FIXME This function is not used
 async function getAssignments(groupId, jwtUser) {
   const aggregate = [
     {
@@ -150,16 +86,171 @@ async function getAssignment(assignmentId, jwtUser) {
     }
   }
 
-  // TODO Do we need full test?
-  const test = await testsService.getTest(assignment.testId, jwtUser);
+  const documentDownloadUrl = await s3Service.getDownloadUrl(assignment.test.document.path);
 
-  return { ...assignment.toJSON(), test };
+  return { ...assignment.toJSON(), test: { ...assignment.test.toJSON(), documentDownloadUrl } };
+}
+
+async function getAssignmentTestDocumentDownloadUrl(assignmentId, jwtUser) {
+  const { test } = await getAssignment(assignmentId, jwtUser);
+
+  return test.documentDownloadUrl;
+}
+
+async function createAssignment(groupId, data) {
+  const { name, startDate, endDate, testId: testTemplateId } = data;
+
+  let assignmentData = { groupId, name };
+  if (startDate) {
+    assignmentData.startDate = startDate;
+  }
+  if (endDate) {
+    assignmentData.endDate = endDate;
+  }
+  if (startDate && endDate && startDate >= endDate) {
+    throw new ApiError(400, 'INVALID_DATES', 'Start date cannot be after end date.');
+  }
+
+  const testTemplate = await testsService.getTest(testTemplateId);
+  assignmentData.test = {
+    templateId: testTemplateId,
+    ...testTemplate,
+  };
+
+  return Assignment.create(assignmentData);
+}
+
+async function updateAssignment(assignmentId, data) {
+  const { name, startDate, endDate } = data;
+  let assignmentData = {
+    name,
+  };
+  if (startDate) {
+    assignmentData.startDate = startDate;
+  }
+  if (endDate) {
+    assignmentData.endDate = endDate;
+  }
+  if (startDate && endDate && startDate >= endDate) {
+    throw new ApiError(400, 'INVALID_DATES', 'Start date cannot be after end date.');
+  }
+
+  return Assignment.findOneAndUpdate({ _id: assignmentId }, assignmentData, {
+    new: true,
+    runValidators: true,
+  });
+}
+
+async function updateAssignmentTest(assignmentId, newTestData) {
+  const { name, questions } = newTestData;
+
+  const updatedAssignment = await Assignment.findOneAndUpdate(
+    { _id: assignmentId },
+    {
+      'test.name': name,
+      'test.questions': questions,
+    },
+    {
+      new: true,
+      runValidators: true,
+    }
+  );
+
+  return updatedAssignment;
+}
+
+async function updateAssignmentTestDocument(assignmentId, newDocument) {
+  const assignment = await Assignment.findById(assignmentId);
+  if (!assignment) {
+    throw new ApiError(
+      404,
+      'ASSIGNMENT_NOT_FOUND',
+      `Assignment not found with id ${assignmentId}.`
+    );
+  }
+
+  newDocument.path = documentsService.getDocumentPath(assignment.test.templateId, newDocument.name);
+  const documentUploadUrl = await s3Service.getUploadUrl(newDocument.path, newDocument.type);
+
+  await _deleteAssignmentDocument(assignmentId, assignment.test.document.path);
+
+  assignment.test.document = newDocument;
+  await assignment.save();
+
+  return { ...assignment.toJSON(), documentUploadUrl };
+}
+
+async function resetAssignmentTest(assignmentId) {
+  const assignment = await Assignment.findById(assignmentId);
+
+  const templateId = assignment.test.templateId;
+  const template = await testsService.getTest(templateId);
+  const { name, document, questions } = template;
+
+  const updatedAssignment = await Assignment.findOneAndUpdate(
+    { _id: assignmentId },
+    {
+      'test.name': name,
+      'test.document': document,
+      'test.questions': questions,
+    },
+    {
+      new: true,
+      runValidators: true,
+    }
+  );
+
+  if (assignment.test.path !== updatedAssignment.test.path) {
+    await _deleteAssignmentDocument(assignmentId, assignment.test.path);
+  }
+
+  return updatedAssignment;
+}
+
+async function deleteAssignment(assignmentId) {
+  const assignment = await Assignment.findById(assignmentId);
+  if (!assignment) {
+    throw new ApiError(
+      404,
+      'ASSIGNMENT_NOT_FOUND',
+      `Assignment not found with id ${assignmentId}.`
+    );
+  }
+
+  await _deleteAssignmentDocument(assignmentId, assignment.test.document.path);
+
+  await Assignment.deleteOne({ _id: assignment });
+}
+
+async function _deleteAssignmentDocument(assignmentId, documentPath) {
+  const doAnyAssignmentsUseDocument = await Assignment.exists({
+    _id: { $ne: assignmentId },
+    'test.document.path': documentPath,
+  });
+  const doAnyTemplatesUseDocument = await testsService.doAnyTestsUseDocumentAtPath(documentPath);
+
+  if (!doAnyAssignmentsUseDocument && !doAnyTemplatesUseDocument) {
+    try {
+      await s3Service.deleteDocument(documentPath);
+    } catch (error) {
+      throw new ApiError(500, 'DELETE_DOCUMENT_ERROR', error.message);
+    }
+  }
+}
+
+async function doAnyAssignmentsUseDocumentAtPath(path) {
+  return Assignment.exists({ 'test.document.path': path });
 }
 
 export default {
-  createAssignment,
-  updateAssignment,
-  deleteAssignment,
   getAssignments,
   getAssignment,
+  getAssignmentTestDocumentDownloadUrl,
+  createAssignment,
+  updateAssignment,
+  updateAssignmentTest,
+  updateAssignmentTestDocument,
+  resetAssignmentTest,
+  deleteAssignment,
+  doAnyAssignmentsUseDocumentAtPath,
 };

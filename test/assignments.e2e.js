@@ -22,7 +22,8 @@ describe('Assignments e2e', () => {
         name: 'name',
         document: {
           type: 'application/pdf',
-          path: 'path',
+          name: 'name.pdf',
+          path: 'something/name.pdf',
         },
         questions: [],
         ...test,

@@ -12,6 +12,7 @@ export default express
   .put('/:groupId([0-9a-fA-F]{24})', asyncErrorHandler(groupsController.updateGroup))
   .delete('/:groupId([0-9a-fA-F]{24})', asyncErrorHandler(groupsController.deleteGroup))
   .post('/:groupId([0-9a-fA-F]{24})/students', asyncErrorHandler(groupsController.enrollStudents))
+
   // Assignments
   .get(
     '/:groupId([0-9a-fA-F]{24})/assignments',
@@ -25,9 +26,25 @@ export default express
     '/:groupId([0-9a-fA-F]{24})/assignments/:assignmentId([0-9a-fA-F]{24})',
     asyncErrorHandler(assignmentsController.getAssignment)
   )
+  .get(
+    '/:groupId([0-9a-fA-F]{24})/assignments/:assignmentId([0-9a-fA-F]{24})/test/document-download-url',
+    asyncErrorHandler(assignmentsController.getAssignmentTestDocumentDownloadUrl)
+  )
   .put(
     '/:groupId([0-9a-fA-F]{24})/assignments/:assignmentId([0-9a-fA-F]{24})',
     asyncErrorHandler(assignmentsController.updateAssignment)
+  )
+  .put(
+    '/:groupId([0-9a-fA-F]{24})/assignments/:assignmentId([0-9a-fA-F]{24})/test',
+    asyncErrorHandler(assignmentsController.updateAssignmentTest)
+  )
+  .put(
+    '/:groupId([0-9a-fA-F]{24})/assignments/:assignmentId([0-9a-fA-F]{24})/test/document',
+    asyncErrorHandler(assignmentsController.updateAssignmentTestDocument)
+  )
+  .put(
+    '/:groupId([0-9a-fA-F]{24})/assignments/:assignmentId([0-9a-fA-F]{24})/test/reset',
+    asyncErrorHandler(assignmentsController.resetAssignmentTest)
   )
   .delete(
     '/:groupId([0-9a-fA-F]{24})/assignments/:assignmentId([0-9a-fA-F]{24})',
