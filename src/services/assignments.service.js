@@ -63,7 +63,7 @@ async function getAssignments(groupId, jwtUser) {
   return result;
 }
 
-async function getAssignment(assignmentId, jwtUser) {
+async function getAssignment(assignmentId, jwtUser, returnCorrectAnswers = false) {
   const assignment = await Assignment.findById(assignmentId);
 
   if (!assignment) {
@@ -73,6 +73,8 @@ async function getAssignment(assignmentId, jwtUser) {
       `Assignment not found with id ${assignmentId}.`
     );
   }
+
+  const test = assignment.test;
 
   if (jwtUser.role === 'student') {
     const isDateWithinInterval = ({ startDate, endDate }, date = new Date()) => {
@@ -84,11 +86,26 @@ async function getAssignment(assignmentId, jwtUser) {
     if (!isDateWithinInterval(assignment)) {
       throw new ApiError(400, 'UNAVAILABLE_ASSIGNMENT', 'This assignment is not available.');
     }
+
+    if (!returnCorrectAnswers) {
+      // Remove correct answers
+      test.questions = test.questions = test.questions.map((question) => {
+        question.answers = question.answers.map((answer) => {
+          if (['text', 'selection'].includes(question.type)) {
+            answer.answer = null;
+          } else {
+            answer.correct = false;
+          }
+          return answer;
+        });
+        return question;
+      });
+    }
   }
 
   const documentDownloadUrl = await s3Service.getDownloadUrl(assignment.test.document.path);
 
-  return { ...assignment.toJSON(), test: { ...assignment.test.toJSON(), documentDownloadUrl } };
+  return { ...assignment.toJSON(), test: { ...test.toJSON(), documentDownloadUrl } };
 }
 
 async function getAssignmentTestDocumentDownloadUrl(assignmentId, jwtUser) {

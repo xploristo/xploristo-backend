@@ -81,7 +81,7 @@ async function getResults(jwtUser) {
 async function createResult(data, jwtUser) {
   const { userId } = jwtUser;
   const { assignmentId, questions } = data;
-  const assignment = await assignmentsService.getAssignment(assignmentId, jwtUser);
+  const assignment = await assignmentsService.getAssignment(assignmentId, jwtUser, true);
   const { test, result: existingResult } = assignment;
   if (existingResult) {
     throw new ApiError(
