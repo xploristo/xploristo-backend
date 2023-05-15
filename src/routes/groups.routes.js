@@ -12,6 +12,14 @@ export default express
   .put('/:groupId([0-9a-fA-F]{24})', asyncErrorHandler(groupsController.updateGroup))
   .delete('/:groupId([0-9a-fA-F]{24})', asyncErrorHandler(groupsController.deleteGroup))
   .post('/:groupId([0-9a-fA-F]{24})/students', asyncErrorHandler(groupsController.enrollStudents))
+  .post(
+    '/:groupId([0-9a-fA-F]{24})/teachers',
+    asyncErrorHandler(groupsController.addTeacherToGroup)
+  )
+  .delete(
+    '/:groupId([0-9a-fA-F]{24})/teachers/:teacherId([0-9a-fA-F]{24})',
+    asyncErrorHandler(groupsController.deleteTeacherFromGroup)
+  )
 
   // Assignments
   .get(

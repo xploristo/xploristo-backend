@@ -156,6 +156,28 @@ async function getUserByCredentials(credentialsId) {
 }
 
 /**
+ * Returns user with given email and role.
+ *
+ * @param {string} email The email.
+ * @param {string} role  The role.
+ *
+ * @returns Found user.
+ * @throws  A USER_NOT_FOUND error when no user is found.
+ */
+async function getUserByEmail(email, role = 'student') {
+  const user = await User.findOne({ email, role });
+  if (!user) {
+    throw new ApiError(
+      404,
+      `USER_NOT_FOUND`,
+      `User not found with email ${email} and role '${role}'.`
+    );
+  }
+
+  return user;
+}
+
+/**
  * Returns given user's profile.
  *
  * @param {string} userId The user's id.
@@ -197,6 +219,7 @@ export default {
   enrollStudent,
   removeStudentsFromGroup,
   getUserByCredentials,
+  getUserByEmail,
   getUserProfile,
   getTeachers,
   getStudents,

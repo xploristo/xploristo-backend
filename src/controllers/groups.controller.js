@@ -55,6 +55,23 @@ async function enrollStudents(req, res) {
   res.status(200).json(group);
 }
 
+async function addTeacherToGroup(req, res) {
+  const { groupId } = req.params;
+  const { teacherEmail } = req.body;
+
+  const group = await groupsService.addTeacherToGroup(groupId, teacherEmail);
+
+  res.status(200).json(group);
+}
+
+async function deleteTeacherFromGroup(req, res) {
+  const { groupId, teacherId } = req.params;
+
+  const group = await groupsService.deleteTeacherFromGroup(groupId, teacherId);
+
+  res.status(200).json(group);
+}
+
 export default {
   getGroup,
   getGroups,
@@ -62,4 +79,6 @@ export default {
   updateGroup,
   deleteGroup,
   enrollStudents,
+  addTeacherToGroup,
+  deleteTeacherFromGroup,
 };

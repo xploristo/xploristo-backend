@@ -94,7 +94,7 @@ async function getGroup(groupId, jwtUser, populate = true) {
         },
       },
       {
-        $unset: ['teacherIds', 'studentIds'],
+        $unset: ['teacherIds', 'studentIds', 'teachers.credentialsId', 'students.credentialsId'],
       },
     ];
   }
@@ -212,6 +212,34 @@ async function enrollStudents(groupId, students, jwtUser) {
   return getGroup(groupId, jwtUser);
 }
 
+async function addTeacherToGroup(groupId, teacherEmail) {
+  // TODO ACL
+  const teacher = await usersService.getUserByEmail(teacherEmail, 'teacher');
+
+  return Group.findOneAndUpdate(
+    { _id: groupId },
+    {
+      $addToSet: {
+        teacherIds: teacher._id,
+      },
+    },
+    { new: true }
+  ).populate({ path: 'teachers', select: '-credentialsId' });
+}
+
+async function deleteTeacherFromGroup(groupId, teacherId) {
+  // TODO ACL
+  return Group.findOneAndUpdate(
+    { _id: groupId },
+    {
+      $pull: {
+        teacherIds: teacherId,
+      },
+    },
+    { new: true }
+  ).populate({ path: 'teachers', select: '-credentialsId' });
+}
+
 export default {
   getGroup,
   getGroups,
@@ -220,4 +248,6 @@ export default {
   deleteGroup,
   enrollStudents,
   removeUserFromGroups,
+  addTeacherToGroup,
+  deleteTeacherFromGroup,
 };
