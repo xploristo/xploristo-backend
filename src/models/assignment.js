@@ -25,6 +25,7 @@ const assignmentSchema = new mongoose.Schema(
     startDate: { type: Date },
     endDate: { type: Date },
     test: { type: testSchema, required: true },
+    resultCount: { type: Number, default: 0 },
   },
   {
     timestamps: true,

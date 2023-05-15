@@ -154,13 +154,17 @@ async function createResult(data, jwtUser) {
   });
   score = (score / test.questions.length) * 10;
 
-  return Result.create({
+  const result = await Result.create({
     assignmentId,
     userId,
     questions,
     score,
     correctAnswersCount,
   });
+
+  await assignmentsService.incrementAssignmentResultsCount(assignmentId);
+
+  return result;
 }
 
 async function getResult(resultId) {
