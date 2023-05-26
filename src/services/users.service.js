@@ -19,12 +19,8 @@ const permissions = {
 
 async function createUser(data) {
   const { email, role, password, groupIds } = data;
-  validateEmail(email);
 
-  const doesUserExist = await User.exists({ email });
-  if (doesUserExist) {
-    throw new ApiError(400, 'DUPLICATE_USER_EMAIL', 'A user already exists with given email');
-  }
+  await _checkUserEmail(email);
 
   const { _id: credentialsId, password: generatedPassword } = await authService.createCredentials(
     email,
@@ -60,12 +56,24 @@ async function getUser(userId) {
 }
 
 async function updateUser(userId, data) {
-  if (data.email) {
-    validateEmail(data.email);
+  const user = await User.findById(userId);
+
+  if (data.email && data.email !== user.email) {
+    await _checkUserEmail(data.email);
+
+    await authService.updateCredentialsEmail(user.credentialsId, data.email);
   }
 
-  const user = await User.findOneAndUpdate({ _id: userId }, data, { new: true, upsert: true });
-  return user;
+  return User.findOneAndUpdate({ _id: userId }, data, { new: true, runValidators: true });
+}
+
+async function _checkUserEmail(email) {
+  validateEmail(email);
+
+  const doesUserExist = await User.exists({ email });
+  if (doesUserExist) {
+    throw new ApiError(400, 'DUPLICATE_USER_EMAIL', 'A user already exists with given email.');
+  }
 }
 
 async function updateUserRole(userId, role) {

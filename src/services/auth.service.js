@@ -56,6 +56,10 @@ async function updateCredentialsRole(credentialsId, role) {
   await Credentials.updateOne({ _id: credentialsId }, { role });
 }
 
+async function updateCredentialsEmail(credentialsId, email) {
+  await Credentials.updateOne({ _id: credentialsId }, { email });
+}
+
 async function setPassword(userId, { oldPassword, password, confirmPassword }) {
   if (password !== confirmPassword) {
     throw new ApiError(
@@ -215,6 +219,7 @@ export default {
   bootstrap,
   createCredentials,
   updateCredentialsRole,
+  updateCredentialsEmail,
   setPassword,
   resetPassword,
   login,
