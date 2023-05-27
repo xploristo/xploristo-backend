@@ -162,7 +162,7 @@ async function createResult(data, jwtUser) {
     correctAnswersCount,
   });
 
-  await assignmentsService.incrementAssignmentResultsCount(assignmentId);
+  await assignmentsService.incrementAssignmentResultCount(assignmentId);
 
   return result;
 }

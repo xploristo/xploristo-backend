@@ -224,8 +224,8 @@ async function resetAssignmentTest(assignmentId) {
   return updatedAssignment;
 }
 
-async function incrementAssignmentResultsCount(assignmentId) {
-  await Assignment.updateOne({ _id: assignmentId }, { $inc: { resultsCount: 1 } });
+async function incrementAssignmentResultCount(assignmentId) {
+  await Assignment.updateOne({ _id: assignmentId }, { $inc: { resultCount: 1 } });
 }
 
 async function deleteAssignment(assignmentId) {
@@ -272,7 +272,7 @@ export default {
   updateAssignmentTest,
   updateAssignmentTestDocument,
   resetAssignmentTest,
-  incrementAssignmentResultsCount,
+  incrementAssignmentResultCount,
   deleteAssignment,
   doAnyAssignmentsUseDocumentAtPath,
 };
