@@ -1,71 +1,11 @@
-import { ObjectId } from 'mongodb';
-
 import { Assignment } from '../models/assignment.js';
 import ApiError from '../helpers/api-error.js';
 import testsService from './tests.service.js';
 import documentsService from './documents.service.js';
 import s3Service from './s3.service.js';
 
-// FIXME This function is not used
-async function getAssignments(groupId, jwtUser) {
-  const aggregate = [
-    {
-      $match: {
-        groupId: ObjectId(groupId),
-      },
-    },
-    {
-      $lookup: {
-        from: 'tests',
-        localField: 'testId',
-        foreignField: '_id',
-        as: 'test',
-      },
-    },
-    {
-      $unwind: {
-        path: '$test',
-        preserveNullAndEmptyArrays: true,
-      },
-    },
-  ];
-  if (jwtUser.role === 'student') {
-    aggregate.push(
-      {
-        $lookup: {
-          from: 'results',
-          let: { assignmentId: '$_id' },
-          pipeline: [
-            {
-              $match: {
-                $expr: {
-                  $and: [
-                    { $eq: ['$assignmentId', '$$assignmentId'] },
-                    { $eq: ['$userId', ObjectId(jwtUser.userId)] },
-                  ],
-                },
-              },
-            },
-          ],
-          as: 'result',
-        },
-      },
-      {
-        $unwind: {
-          path: '$result',
-          preserveNullAndEmptyArrays: true,
-        },
-      }
-    );
-  }
-  const result = await Assignment.aggregate(aggregate);
-
-  return result;
-}
-
 async function getAssignment(assignmentId, jwtUser, returnCorrectAnswers = false) {
   const assignment = await Assignment.findById(assignmentId);
-
   if (!assignment) {
     throw new ApiError(
       404,
@@ -264,7 +204,6 @@ async function doAnyAssignmentsUseDocumentAtPath(path) {
 }
 
 export default {
-  getAssignments,
   getAssignment,
   getAssignmentTestDocumentDownloadUrl,
   createAssignment,

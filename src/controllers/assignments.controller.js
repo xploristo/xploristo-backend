@@ -11,18 +11,6 @@ const allowedActions = {
   deleteAssignment: (jwtUser) => ['admin', 'teacher'].includes(jwtUser.role),
 };
 
-async function getAssignments(req, res) {
-  const { groupId } = req.params;
-
-  const assignments = await assignmentsService.getAssignments(groupId, req.jwtUser);
-
-  if (!assignments || !assignments.length) {
-    return res.status(204).json(assignments);
-  }
-
-  res.status(200).json(assignments);
-}
-
 async function getAssignment(req, res) {
   const assignment = await assignmentsService.getAssignment(req.params.assignmentId, req.jwtUser);
 
@@ -116,7 +104,6 @@ async function deleteAssignment(req, res) {
 }
 
 export default {
-  getAssignments,
   getAssignment,
   getAssignmentTestDocumentDownloadUrl,
   createAssignment,

@@ -22,10 +22,6 @@ export default express
   )
 
   // Assignments
-  .get(
-    '/:groupId([0-9a-fA-F]{24})/assignments',
-    asyncErrorHandler(assignmentsController.getAssignments)
-  )
   .post(
     '/:groupId([0-9a-fA-F]{24})/assignments',
     asyncErrorHandler(assignmentsController.createAssignment)
