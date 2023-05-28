@@ -26,6 +26,7 @@ const assignmentSchema = new mongoose.Schema(
     endDate: { type: Date },
     test: { type: testSchema, required: true },
     resultCount: { type: Number, default: 0 },
+    isVisible: { type: Boolean, default: true },
   },
   {
     timestamps: true,

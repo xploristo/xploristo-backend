@@ -22,6 +22,11 @@ async function getGroup(groupId, jwtUser, populate = true) {
   if (jwtUser.role === 'student') {
     assignmentAggregate.push(
       {
+        $match: {
+          $expr: { $eq: ['$isVisible', true] },
+        },
+      },
+      {
         $lookup: {
           from: 'results',
           let: { assignmentId: '$_id' },

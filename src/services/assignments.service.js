@@ -23,7 +23,7 @@ async function getAssignment(assignmentId, jwtUser, returnCorrectAnswers = false
       if (!endDate) return date > new Date(startDate);
       return date > new Date(startDate) && date < new Date(endDate);
     };
-    if (!isDateWithinInterval(assignment)) {
+    if (!assignment.isVisible || !isDateWithinInterval(assignment)) {
       throw new ApiError(400, 'UNAVAILABLE_ASSIGNMENT', 'This assignment is not available.');
     }
 
@@ -55,9 +55,9 @@ async function getAssignmentTestDocumentDownloadUrl(assignmentId, jwtUser) {
 }
 
 async function createAssignment(groupId, data) {
-  const { name, startDate, endDate, testId: testTemplateId } = data;
+  const { name, startDate, endDate, isVisible, testId: testTemplateId } = data;
 
-  let assignmentData = { groupId, name };
+  let assignmentData = { groupId, name, isVisible };
   if (startDate) {
     assignmentData.startDate = startDate;
   }
@@ -78,9 +78,10 @@ async function createAssignment(groupId, data) {
 }
 
 async function updateAssignment(assignmentId, data) {
-  const { name, startDate, endDate } = data;
+  const { name, startDate, endDate, isVisible } = data;
   let assignmentData = {
     name,
+    isVisible,
   };
   if (startDate) {
     assignmentData.startDate = startDate;
