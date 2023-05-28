@@ -6,6 +6,7 @@ const groupSchema = new mongoose.Schema(
     name: { type: String, required: true },
     teacherIds: [{ type: ObjectId, ref: 'User' }],
     studentIds: [{ type: ObjectId, ref: 'User' }],
+    isVisible: { type: Boolean, default: true },
   },
   {
     timestamps: true,

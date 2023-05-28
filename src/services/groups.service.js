@@ -6,7 +6,11 @@ import ApiError from '../helpers/api-error.js';
 
 async function getGroup(groupId, jwtUser, populate = true) {
   if (!populate) {
-    return await Group.findById(groupId);
+    const group = await Group.findById(groupId);
+    if (!group || (jwtUser.role === 'student' && !group.isVisible)) {
+      throw new ApiError(404, 'GROUP_NOT_FOUND', `Group not found with id ${groupId}.`);
+    }
+    return group;
   }
 
   // TODO Paginate
@@ -103,10 +107,19 @@ async function getGroup(groupId, jwtUser, populate = true) {
       },
     ];
   }
+
+  const role = jwtUser.role;
+  const roleMatch =
+    role === 'admin'
+      ? {}
+      : role === 'teacher'
+      ? { $expr: { $in: [ObjectId(jwtUser.userId), '$teacherIds'] } }
+      : { $expr: { $in: [ObjectId(jwtUser.userId), '$studentIds'] }, isVisible: true };
   const aggregate = [
     {
       $match: {
         _id: ObjectId(groupId),
+        ...roleMatch,
       },
     },
     {
@@ -135,7 +148,7 @@ async function getGroups(jwtUser) {
       ? {}
       : role === 'teacher'
       ? { teacherIds: ObjectId(userId) }
-      : { studentIds: ObjectId(userId) };
+      : { studentIds: ObjectId(userId), isVisible: true };
 
   const groups = await Group.find(query).sort({ updatedAt: -1 });
 
@@ -143,20 +156,20 @@ async function getGroups(jwtUser) {
 }
 
 async function createGroup(data, teacherId) {
-  let { name } = data;
+  let { name, isVisible } = data;
   const teacherIds = [teacherId];
 
-  const group = await Group.create({ name, teacherIds });
+  const group = await Group.create({ name, isVisible, teacherIds });
 
   return group;
 }
 
 async function updateGroup(groupId, data) {
-  let { name } = data;
+  let { name, isVisible } = data;
 
   const group = await Group.findOneAndUpdate(
     { _id: groupId },
-    { name },
+    { name, isVisible },
     { new: true, upsert: true }
   );
   return group;
