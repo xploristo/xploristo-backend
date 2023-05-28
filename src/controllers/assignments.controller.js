@@ -97,7 +97,10 @@ async function resetAssignmentTest(req, res) {
     throw new ApiError(403, 'FORBIDDEN', "You are not allowed to reset this assignment's test.");
   }
 
-  const assignment = await assignmentsService.resetAssignmentTest(req.params.assignmentId);
+  const assignment = await assignmentsService.resetAssignmentTest(
+    req.params.assignmentId,
+    req.query.templateId
+  );
 
   res.status(200).json(assignment);
 }

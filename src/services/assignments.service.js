@@ -197,10 +197,10 @@ async function updateAssignmentTestDocument(assignmentId, newDocument) {
   return { ...assignment.toJSON(), documentUploadUrl };
 }
 
-async function resetAssignmentTest(assignmentId) {
+async function resetAssignmentTest(assignmentId, templateId) {
   const assignment = await Assignment.findById(assignmentId);
 
-  const templateId = assignment.test.templateId;
+  templateId = templateId ?? assignment.test.templateId;
   const template = await testsService.getTest(templateId);
   const { name, document, questions } = template;
 
