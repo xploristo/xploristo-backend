@@ -76,7 +76,7 @@ async function setPassword(userId, { oldPassword, password, confirmPassword }) {
 
   const didPasswordMatch = await bcryptjs.compare(oldPassword, credentials.password);
   if (!didPasswordMatch) {
-    throw new ApiError(400, 'WRONG_PASSWORD', 'Wrong password');
+    throw new ApiError(400, 'WRONG_PASSWORD', 'Wrong password.');
   }
 
   if (oldPassword === password) {

@@ -125,7 +125,7 @@ async function createAssignment(groupId, data) {
     assignmentData.endDate = endDate;
   }
   if (startDate && endDate && startDate >= endDate) {
-    throw new ApiError(400, 'INVALID_DATES', 'Start date cannot be after end date.');
+    throw new ApiError(400, 'INVALID_END_DATE', 'Start date cannot be after end date.'); // TODO
   }
 
   const testTemplate = await testsService.getTest(testTemplateId);
@@ -149,7 +149,7 @@ async function updateAssignment(assignmentId, data) {
     assignmentData.endDate = endDate;
   }
   if (startDate && endDate && startDate >= endDate) {
-    throw new ApiError(400, 'INVALID_DATES', 'Start date cannot be after end date.');
+    throw new ApiError(400, 'INVALID_END_DATE', 'Start date cannot be after end date.');
   }
 
   return Assignment.findOneAndUpdate({ _id: assignmentId }, assignmentData, {
@@ -254,7 +254,7 @@ async function _deleteAssignmentDocument(assignmentId, documentPath) {
     try {
       await s3Service.deleteDocument(documentPath);
     } catch (error) {
-      throw new ApiError(500, 'DELETE_DOCUMENT_ERROR', error.message);
+      throw new ApiError(500, 'DELETE_DOCUMENT_ERROR', error.message); // TODO
     }
   }
 }
