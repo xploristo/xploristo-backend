@@ -169,6 +169,10 @@ async function incrementAssignmentResultCount(assignmentId) {
   await Assignment.updateOne({ _id: assignmentId }, { $inc: { resultCount: 1 } });
 }
 
+async function decrementAssignmentResultCount(assignmentId) {
+  await Assignment.updateOne({ _id: assignmentId }, { $inc: { resultCount: -1 } });
+}
+
 async function deleteAssignment(assignmentId) {
   const assignment = await Assignment.findById(assignmentId);
   if (!assignment) {
@@ -213,6 +217,7 @@ export default {
   updateAssignmentTestDocument,
   resetAssignmentTest,
   incrementAssignmentResultCount,
+  decrementAssignmentResultCount,
   deleteAssignment,
   doAnyAssignmentsUseDocumentAtPath,
 };

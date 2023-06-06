@@ -253,6 +253,12 @@ async function getResult(resultId) {
  * @param {string} groupId The group's id.
  */
 async function deleteStudentResults(userId, groupId) {
+  const results = await Result.find({ userId, groupId });
+
+  await Promise.all(
+    results.map((result) => assignmentsService.decrementAssignmentResultCount(result.assignmentId))
+  );
+
   await Result.deleteMany({ userId, groupId });
 }
 
