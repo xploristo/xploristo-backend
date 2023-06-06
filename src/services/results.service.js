@@ -133,7 +133,8 @@ async function createResult(data, jwtUser) {
 
       // TODO Better comparison
       if (type === 'selection') {
-        isAnswerCorrect = studentAnswer.answer.textSelection === correctAnswer.answer.textSelection;
+        isAnswerCorrect =
+          studentAnswer.answer?.textSelection === correctAnswer.answer.textSelection;
         question.answers[0].correctAnswer = {
           correct: isAnswerCorrect,
           value: correctAnswer.answer.textSelection,
@@ -156,6 +157,7 @@ async function createResult(data, jwtUser) {
 
   const result = await Result.create({
     assignmentId,
+    groupId: assignment.groupId,
     userId,
     questions,
     score,
@@ -244,8 +246,19 @@ async function getResult(resultId) {
   throw new ApiError(404, 'RESULT_NOT_FOUND', `Result not found with id ${resultId}.`);
 }
 
+/**
+ * Deletes all given student's results for provided group.
+ *
+ * @param {string} userId  The user's id.
+ * @param {string} groupId The group's id.
+ */
+async function deleteStudentResults(userId, groupId) {
+  await Result.deleteMany({ userId, groupId });
+}
+
 export default {
   getResults,
   createResult,
   getResult,
+  deleteStudentResults,
 };

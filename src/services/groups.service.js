@@ -3,6 +3,7 @@ import { ObjectId } from 'mongodb';
 import { Group } from '../models/group.js';
 import usersService from './users.service.js';
 import ApiError from '../helpers/api-error.js';
+import resultsService from './results.service.js';
 
 async function getGroup(groupId, jwtUser, populate = true) {
   if (!populate) {
@@ -185,21 +186,6 @@ async function deleteGroup(groupId) {
   await Group.deleteOne({ _id: groupId });
 }
 
-async function removeUserFromGroups(userId) {
-  return await Group.updateMany(
-    {
-      $match: {
-        $expr: {
-          $or: [{ teacherIds: ObjectId(userId) }, { studentIds: ObjectId(userId) }],
-        },
-      },
-    },
-    {
-      $pull: { teacherIds: ObjectId(userId), studentIds: ObjectId(userId) },
-    }
-  );
-}
-
 /**
  * Enrolls provided students to given group.
  *
@@ -228,6 +214,43 @@ async function enrollStudents(groupId, students, jwtUser) {
   );
 
   return getGroup(groupId, jwtUser);
+}
+
+/**
+ * Removes given user from all groups.
+ *
+ * @param {string} userId The user's id.
+ */
+async function removeUserFromAllGroups(userId) {
+  await Group.updateMany(
+    {
+      $match: {
+        $expr: {
+          $or: [{ teacherIds: ObjectId(userId) }, { studentIds: ObjectId(userId) }],
+        },
+      },
+    },
+    {
+      $pull: { teacherIds: ObjectId(userId), studentIds: ObjectId(userId) },
+    }
+  );
+}
+
+/**
+ * Removes given student from provided group, and all their results from said group's assignments.
+ *
+ * @param {string} userId  The user's id.
+ * @param {string} groupId The group's id.
+ */
+async function removeStudentFromGroup(userId, groupId) {
+  await resultsService.deleteStudentResults(userId, groupId);
+
+  await Group.updateOne(
+    { _id: groupId },
+    {
+      $pull: { studentIds: ObjectId(userId) },
+    }
+  );
 }
 
 async function addTeacherToGroup(groupId, teacherEmail) {
@@ -265,7 +288,8 @@ export default {
   updateGroup,
   deleteGroup,
   enrollStudents,
-  removeUserFromGroups,
+  removeUserFromAllGroups,
+  removeStudentFromGroup,
   addTeacherToGroup,
   deleteTeacherFromGroup,
 };

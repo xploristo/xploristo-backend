@@ -104,19 +104,29 @@ async function deleteUser(userId, groupId) {
       throw new ApiError(400, 'WRONG_GROUP', 'User does not belong to given group.');
     }
 
+    await groupsService.removeStudentFromGroup(userId, groupId);
+
     if (user.groupIds.length > 1) {
-      // TODO Teachers?
+      // We remove user from group but we do not delete the user or their credentials
       await User.updateOne({ _id: userId }, { $pull: { groupIds: ObjectId(groupId) } });
-      await groupsService.removeUserFromGroups(userId);
       return;
     }
+  } else if (user.role === 'teacher') {
+    await groupsService.removeUserFromAllGroups(userId);
   }
 
   await User.deleteOne({ _id: userId });
-  await groupsService.removeUserFromGroups(userId);
   await authService.deleteCredentials(user.credentialsId);
 }
 
+/**
+ * Enrolls student to given group.
+ *
+ * @param {string} groupId     The group's id.
+ * @param {object} studentData The student's data.
+ *
+ * @returns Created student.
+ */
 async function enrollStudent(groupId, studentData) {
   const { email, ...student } = studentData;
 
