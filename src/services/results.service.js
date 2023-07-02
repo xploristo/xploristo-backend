@@ -116,6 +116,10 @@ async function createResult(data, jwtUser) {
         isAnswerCorrect = correctAnswers.every((correctAnswer) =>
           studentAnswers.find((studentAnswer) => studentAnswer.index === correctAnswer.index)
         );
+        if (isAnswerCorrect) {
+          score += 1;
+          correctAnswersCount += 1;
+        }
       }
       question.answers = answers.map((answer) => {
         const testAnswer = testQuestion.answers.find(
@@ -127,30 +131,53 @@ async function createResult(data, jwtUser) {
         };
         return answer;
       });
+    } else if (type === 'selection') {
+      const totalAnswers = answers.length;
+      const totalExpectedAnswers = testQuestion.answers.length;
+      let correctSelectionsCount = 0;
+
+      const testAnswers = [...testQuestion.answers];
+
+      answers.forEach((studentAnswer, index) => {
+        // TODO Better comparison
+        const testAnswerIndex = testQuestion.answers.findIndex(
+          (testAnswer) => testAnswer.answer.textSelection === studentAnswer.answer.textSelection
+        );
+        const isAnswerCorrect = testAnswerIndex !== -1;
+        question.answers[index].isAnswerCorrect = isAnswerCorrect;
+
+        if (isAnswerCorrect) {
+          correctSelectionsCount++;
+          testAnswers.splice(testAnswerIndex, 1);
+        }
+      });
+
+      question.missingAnswers = testAnswers;
+
+      const pointsByCorrectSelection = 1 / totalExpectedAnswers;
+      const pointsByIncorrectSelection = pointsByCorrectSelection;
+      const incorrectSelectionsCount = totalAnswers - correctSelectionsCount;
+      const questionScore =
+        pointsByCorrectSelection * correctSelectionsCount -
+        pointsByIncorrectSelection * incorrectSelectionsCount;
+      score += questionScore;
+
+      if (questionScore === 1) {
+        correctAnswersCount += 1;
+      }
     } else {
       const studentAnswer = answers[0];
       const correctAnswer = testQuestion.answers[0];
 
-      // TODO Better comparison
-      if (type === 'selection') {
-        isAnswerCorrect =
-          studentAnswer.answer?.textSelection === correctAnswer.answer.textSelection;
-        question.answers[0].correctAnswer = {
-          correct: isAnswerCorrect,
-          value: correctAnswer.answer.textSelection,
-        };
-      } else if (type === 'text') {
-        isAnswerCorrect = studentAnswer.answer === correctAnswer.answer;
-        question.answers[0].correctAnswer = {
-          correct: isAnswerCorrect,
-          value: correctAnswer.answer,
-        };
+      isAnswerCorrect = studentAnswer.answer === correctAnswer.answer;
+      if (isAnswerCorrect) {
+        score += 1;
+        correctAnswersCount += 1;
       }
-    }
-
-    if (isAnswerCorrect) {
-      score += 1;
-      correctAnswersCount += 1;
+      question.answers[0].correctAnswer = {
+        correct: isAnswerCorrect,
+        value: correctAnswer.answer,
+      };
     }
   });
   score = (score / test.questions.length) * 10;

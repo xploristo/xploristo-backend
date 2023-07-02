@@ -30,14 +30,17 @@ async function getAssignment(assignmentId, jwtUser, returnCorrectAnswers = false
     if (!returnCorrectAnswers) {
       // Remove correct answers
       test.questions = test.questions = test.questions.map((question) => {
-        question.answers = question.answers.map((answer) => {
-          if (['text', 'selection'].includes(question.type)) {
-            answer.answer = null;
-          } else {
-            answer.correct = false;
-          }
-          return answer;
-        });
+        question.answers =
+          question.type === 'selection'
+            ? []
+            : question.answers.map((answer) => {
+                if (question.type === 'text') {
+                  answer.answer = null;
+                } else {
+                  answer.correct = false;
+                }
+                return answer;
+              });
         return question;
       });
     }
