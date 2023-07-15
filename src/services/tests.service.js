@@ -62,7 +62,9 @@ async function createTest(testData) {
   test.document.path = documentPath;
   await test.save();
 
-  return { ...test.toJSON(), documentUploadUrl };
+  const documentDownloadUrl = await s3Service.getDownloadUrl(documentPath);
+
+  return { ...test.toJSON(), documentUploadUrl, documentDownloadUrl };
 }
 
 async function updateTest(testId, data) {
