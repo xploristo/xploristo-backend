@@ -174,22 +174,17 @@ async function getUserByCredentials(credentialsId) {
 }
 
 /**
- * Returns user with given email and role.
+ * Returns teacher (or admin) with given email.
  *
  * @param {string} email The email.
- * @param {string} role  The role.
  *
- * @returns Found user.
- * @throws  A USER_NOT_FOUND error when no user is found.
+ * @returns Found teacher.
+ * @throws  A TEACHER_NOT_FOUND error when no teacher (or admin) is found.
  */
-async function getUserByEmail(email, role = 'student') {
-  const user = await User.findOne({ email, role });
+async function getTeacherByEmail(email) {
+  const user = await User.findOne({ email, role: { $in: ['teacher', 'admin'] } });
   if (!user) {
-    throw new ApiError(
-      404,
-      `USER_NOT_FOUND`,
-      `User not found with email ${email} and role '${role}'.`
-    );
+    throw new ApiError(404, `TEACHER_NOT_FOUND`, `Teacher not found with email '${email}'.`);
   }
 
   return user;
@@ -237,7 +232,7 @@ export default {
   enrollStudent,
   removeStudentsFromGroup,
   getUserByCredentials,
-  getUserByEmail,
+  getTeacherByEmail,
   getUserProfile,
   getTeachers,
   getStudents,

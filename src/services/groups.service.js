@@ -255,7 +255,7 @@ async function removeStudentFromGroup(userId, groupId) {
 
 async function addTeacherToGroup(groupId, teacherEmail) {
   // TODO ACL
-  const teacher = await usersService.getUserByEmail(teacherEmail, 'teacher');
+  const teacher = await usersService.getTeacherByEmail(teacherEmail);
 
   return Group.findOneAndUpdate(
     { _id: groupId },
