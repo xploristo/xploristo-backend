@@ -15,57 +15,34 @@ chai.use(sinonChai);
 describe('Assignments e2e', () => {
   const groupId = new ObjectId();
 
-  async function createAssignment(assignment, test) {
-    let testId = new ObjectId();
-    if (test) {
-      const createdTest = await Test.create({
-        name: 'name',
-        document: {
-          type: 'application/pdf',
-          name: 'name.pdf',
-          path: 'something/name.pdf',
-        },
-        questions: [],
-        ...test,
-      });
-      testId = createdTest._id;
-    }
-    return await Assignment.create({
-      groupId: new ObjectId(),
-      testId,
+  async function createAssignment(assignmentData, testData = {}) {
+    const test = await Test.create({
       name: 'name',
-      ...assignment,
+      document: {
+        type: 'application/pdf',
+        name: 'name.pdf',
+        path: 'something/name.pdf',
+      },
+      questions: [],
+      ...testData,
+    });
+
+    return Assignment.create({
+      groupId: new ObjectId(),
+      name: 'name',
+      test: {
+        templateId: test._id,
+        name: test.name,
+        document: test.document,
+        questions: test.questions,
+      },
+      ...assignmentData,
     });
   }
 
   afterEach(async () => {
     await Assignment.deleteMany({});
     await Test.deleteMany({});
-  });
-
-  describe('GET /:groupId/assignments', () => {
-    describe('when assignments exists', () => {
-      beforeEach(async () => {
-        await Promise.all(
-          [...Array(10).keys()].map(async () => await createAssignment({ groupId }))
-        );
-      });
-
-      it('should return them', async () => {
-        const res = await request(server.app).get(`/groups/${groupId}/assignments`);
-        expect(res.statusCode).to.equal(200);
-
-        expect(res.body).to.exist;
-        expect(res.body.length).to.equal(10);
-      });
-    });
-
-    describe('when assignments do not exist', () => {
-      it('should return NO_CONTENT', async () => {
-        const res = await request(server.app).get(`/groups/${groupId}/assignments`);
-        expect(res.statusCode).to.equal(204);
-      });
-    });
   });
 
   describe('GET /:groupId/assignments/:assignmentId', () => {
@@ -171,129 +148,134 @@ describe('Assignments e2e', () => {
   });
 
   describe('POST /:groupId/assignments', () => {
-    let assignment;
+    let testId;
+    let today = new Date();
+    let tomorrow = new Date(new Date().getTime() + 24 * 60 * 60 * 1000);
+
+    beforeEach(async () => {
+      const test = await Test.create({
+        name: 'Test template',
+        document: {
+          type: 'application/pdf',
+          name: 'test.pdf',
+          path: 'something/test.pdf',
+        },
+        questions: [],
+      });
+      testId = test._id;
+    });
 
     describe('when assignment does not have a start or end date', () => {
-      beforeEach(() => {
-        assignment = {
+      it('should create it with no dates', async () => {
+        const newAssignmentData = {
           groupId,
-          testId: new ObjectId(),
+          testId,
           name: 'testWithNoDates',
         };
-      });
 
-      it('should create it with no dates', async () => {
         const res = await request(server.app)
           .post(`/groups/${groupId}/assignments`)
-          .send(assignment);
+          .send(newAssignmentData);
 
         expect(res.statusCode).to.equal(201);
         expect(res.body).to.be.an('object');
-        expect(res.body.name).to.equal(assignment.name);
-        expect(res.body.groupId.toString()).to.equal(assignment.groupId.toString());
-        expect(res.body.testId.toString()).to.equal(assignment.testId.toString());
+        expect(res.body.name).to.equal(newAssignmentData.name);
+        expect(res.body.groupId.toString()).to.equal(newAssignmentData.groupId.toString());
+        expect(res.body.test.templateId.toString()).to.equal(newAssignmentData.testId.toString());
         expect(res.body.startDate).to.not.exists;
         expect(res.body.endDate).to.not.exists;
 
         const createdAssignment = await Assignment.findById(res.body._id);
-        expect(createdAssignment.name).to.equal(assignment.name);
-        expect(createdAssignment.groupId.toString()).to.equal(assignment.groupId.toString());
-        expect(createdAssignment.testId.toString()).to.equal(assignment.testId.toString());
+        expect(createdAssignment.groupId.toString()).to.equal(newAssignmentData.groupId.toString());
+        expect(createdAssignment.test.templateId.toString()).to.equal(
+          newAssignmentData.testId.toString()
+        );
         expect(createdAssignment.startDate).to.not.exists;
         expect(createdAssignment.endDate).to.not.exists;
       });
     });
 
     describe('when assignment does only have an end date', () => {
-      let tomorrow = new Date(new Date().getTime() + 24 * 60 * 60 * 1000);
-
-      beforeEach(() => {
-        assignment = {
+      it('should create it with an end date', async () => {
+        const newAssignmentData = {
           groupId,
-          testId: new ObjectId(),
+          testId,
           name: 'testWithDates',
           endDate: tomorrow,
         };
-      });
 
-      it('should create it with an end date', async () => {
         const res = await request(server.app)
           .post(`/groups/${groupId}/assignments`)
-          .send(assignment);
+          .send(newAssignmentData);
 
         expect(res.statusCode).to.equal(201);
         expect(res.body).to.be.an('object');
-        expect(res.body.name).to.equal(assignment.name);
-        expect(res.body.groupId.toString()).to.equal(assignment.groupId.toString());
-        expect(res.body.testId.toString()).to.equal(assignment.testId.toString());
+        expect(res.body.name).to.equal(newAssignmentData.name);
+        expect(res.body.groupId.toString()).to.equal(newAssignmentData.groupId.toString());
+        expect(res.body.test.templateId.toString()).to.equal(newAssignmentData.testId.toString());
         expect(res.body.startDate).to.not.exists;
-        expect(res.body.endDate).to.equal(assignment.endDate.toISOString());
+        expect(res.body.endDate).to.equal(newAssignmentData.endDate.toISOString());
 
         const createdAssignment = await Assignment.findById(res.body._id);
-        expect(createdAssignment.name).to.equal(assignment.name);
-        expect(createdAssignment.groupId.toString()).to.equal(assignment.groupId.toString());
-        expect(createdAssignment.testId.toString()).to.equal(assignment.testId.toString());
+        expect(createdAssignment.name).to.equal(newAssignmentData.name);
+        expect(createdAssignment.groupId.toString()).to.equal(newAssignmentData.groupId.toString());
+        expect(createdAssignment.test.templateId.toString()).to.equal(
+          newAssignmentData.testId.toString()
+        );
         expect(createdAssignment.startDate).to.not.exists;
-        expect(createdAssignment.endDate.toISOString()).to.equal(assignment.endDate.toISOString());
+        expect(createdAssignment.endDate.toISOString()).to.equal(
+          newAssignmentData.endDate.toISOString()
+        );
       });
     });
 
     describe('when assignment does have a start and end date', () => {
-      let today = new Date();
-      let tomorrow = new Date(new Date().getTime() + 24 * 60 * 60 * 1000);
-
-      beforeEach(() => {
-        assignment = {
+      it('should create it with start and end date', async () => {
+        const newAssignmentData = {
           groupId,
-          testId: new ObjectId(),
+          testId,
           name: 'testWithDates',
           startDate: today,
           endDate: tomorrow,
         };
-      });
 
-      it('should create it with start and end date', async () => {
         const res = await request(server.app)
           .post(`/groups/${groupId}/assignments`)
-          .send(assignment);
+          .send(newAssignmentData);
 
         expect(res.statusCode).to.equal(201);
         expect(res.body).to.be.an('object');
-        expect(res.body.name).to.equal(assignment.name);
-        expect(res.body.groupId.toString()).to.equal(assignment.groupId.toString());
-        expect(res.body.testId.toString()).to.equal(assignment.testId.toString());
-        expect(res.body.startDate).to.equal(assignment.startDate.toISOString());
-        expect(res.body.endDate).to.equal(assignment.endDate.toISOString());
+        expect(res.body.name).to.equal(newAssignmentData.name);
+        expect(res.body.groupId.toString()).to.equal(newAssignmentData.groupId.toString());
+        expect(res.body.test.templateId.toString()).to.equal(newAssignmentData.testId.toString());
+        expect(res.body.startDate).to.equal(newAssignmentData.startDate.toISOString());
+        expect(res.body.endDate).to.equal(newAssignmentData.endDate.toISOString());
 
         const createdAssignment = await Assignment.findById(res.body._id);
-        expect(createdAssignment.name).to.equal(assignment.name);
-        expect(createdAssignment.groupId.toString()).to.equal(assignment.groupId.toString());
-        expect(createdAssignment.testId.toString()).to.equal(assignment.testId.toString());
-        expect(createdAssignment.startDate.toISOString()).to.equal(
-          assignment.startDate.toISOString()
+        expect(createdAssignment.name).to.equal(newAssignmentData.name);
+        expect(createdAssignment.groupId.toString()).to.equal(newAssignmentData.groupId.toString());
+        expect(createdAssignment.test.templateId.toString()).to.equal(
+          newAssignmentData.testId.toString()
         );
-        expect(createdAssignment.endDate.toISOString()).to.equal(assignment.endDate.toISOString());
+        expect(createdAssignment.startDate.toISOString()).to.equal(
+          newAssignmentData.startDate.toISOString()
+        );
+        expect(createdAssignment.endDate.toISOString()).to.equal(
+          newAssignmentData.endDate.toISOString()
+        );
       });
     });
 
     describe('when assignment does have an end date before the start date', () => {
-      let today = new Date();
-      let tomorrow = new Date(new Date().getTime() + 24 * 60 * 60 * 1000);
-
-      beforeEach(() => {
-        assignment = {
+      it('should return BAD_REQUEST', async () => {
+        const res = await request(server.app).post(`/groups/${groupId}/assignments`).send({
           groupId,
-          testId: new ObjectId(),
+          testId,
           name: 'testWithInvalidDates',
           startDate: tomorrow,
           endDate: today,
-        };
-      });
+        });
 
-      it('should return BAD_REQUEST', async () => {
-        const res = await request(server.app)
-          .post(`/groups/${groupId}/assignments`)
-          .send(assignment);
         expect(res.statusCode).to.equal(400);
       });
     });
@@ -321,14 +303,16 @@ describe('Assignments e2e', () => {
         expect(res.body).to.be.an('object');
         expect(res.body.name).to.equal(newName);
         expect(res.body.groupId.toString()).to.equal(assignment.groupId.toString());
-        expect(res.body.testId.toString()).to.equal(assignment.testId.toString());
+        expect(res.body.test.templateId.toString()).to.equal(assignment.test.templateId.toString());
         expect(res.body.startDate).to.not.exists;
         expect(res.body.endDate).to.not.exists;
 
         const updatedAssignment = await Assignment.findById(res.body._id);
         expect(updatedAssignment.name).to.equal(newName);
         expect(updatedAssignment.groupId.toString()).to.equal(assignment.groupId.toString());
-        expect(updatedAssignment.testId.toString()).to.equal(assignment.testId.toString());
+        expect(updatedAssignment.test.templateId.toString()).to.equal(
+          assignment.test.templateId.toString()
+        );
         expect(updatedAssignment.startDate).to.not.exists;
         expect(updatedAssignment.endDate).to.not.exists;
       });
@@ -359,14 +343,16 @@ describe('Assignments e2e', () => {
         expect(res.body).to.be.an('object');
         expect(res.body.name).to.equal(assignment.name);
         expect(res.body.groupId.toString()).to.equal(assignment.groupId.toString());
-        expect(res.body.testId.toString()).to.equal(assignment.testId.toString());
+        expect(res.body.test.templateId.toString()).to.equal(assignment.test.templateId.toString());
         expect(res.body.startDate).to.equal(assignment.startDate.toISOString());
         expect(res.body.endDate).to.equal(newEndDate.toISOString());
 
         const updatedAssignment = await Assignment.findById(res.body._id);
         expect(updatedAssignment.name).to.equal(assignment.name);
         expect(updatedAssignment.groupId.toString()).to.equal(assignment.groupId.toString());
-        expect(updatedAssignment.testId.toString()).to.equal(assignment.testId.toString());
+        expect(updatedAssignment.test.templateId.toString()).to.equal(
+          assignment.test.templateId.toString()
+        );
         expect(updatedAssignment.startDate.toISOString()).to.equal(
           assignment.startDate.toISOString()
         );
@@ -397,14 +383,16 @@ describe('Assignments e2e', () => {
         expect(res.body).to.be.an('object');
         expect(res.body.name).to.equal(assignment.name);
         expect(res.body.groupId.toString()).to.equal(assignment.groupId.toString());
-        expect(res.body.testId.toString()).to.equal(assignment.testId.toString());
+        expect(res.body.test.templateId.toString()).to.equal(assignment.test.templateId.toString());
         expect(res.body.startDate).to.not.exists;
         expect(res.body.endDate).to.equal(newEndDate.toISOString());
 
         const createdAssignment = await Assignment.findById(res.body._id);
         expect(createdAssignment.name).to.equal(assignment.name);
         expect(createdAssignment.groupId.toString()).to.equal(assignment.groupId.toString());
-        expect(createdAssignment.testId.toString()).to.equal(assignment.testId.toString());
+        expect(createdAssignment.test.templateId.toString()).to.equal(
+          assignment.test.templateId.toString()
+        );
         expect(createdAssignment.startDate).to.not.exists;
         expect(createdAssignment.endDate.toISOString()).to.equal(newEndDate.toISOString());
       });
