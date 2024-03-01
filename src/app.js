@@ -69,9 +69,6 @@ async function stop() {
 
   await mongooseService.disconnect();
   console.info('👋 MongoDB disconnected.');
-
-  console.info('👋 Exiting...');
-  process.exit(0);
 }
 
 // TODO Errors when starting app via handler are sent as 200
