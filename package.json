@@ -24,7 +24,6 @@
     "start:server": "NODE_ENV=development node --experimental-json-modules ./server.js",
     "start:dev": "serverless offline",
     "test": "NODE_ENV=test npx c8 mocha --experimental-json-modules",
-    "test:debug": "NODE_ENV=test npx c8 mocha --experimental-json-modules --inspect-brk",
     "test:only": "NODE_ENV=test npx mocha --experimental-json-modules",
     "test:report": "NODE_ENV=test npx c8 --reporter=html -reporter=text mocha --experimental-json-modules"
   },
